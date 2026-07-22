@@ -1,3 +1,13 @@
+---
+title: Workflow Builder Essentials
+description: Plain-language guide to the workflow builder for municipal clerks, code officers, and program staff
+published: true
+date: 2026-07-21T00:00:00.000Z
+tags: 
+editor: markdown
+dateCreated: 2026-07-21T00:00:00.000Z
+---
+
 # Workflow Builder Essentials
 
 This guide is for municipal clerks, code officers, and program staff who need to understand the workflow builder without thinking like a programmer.
