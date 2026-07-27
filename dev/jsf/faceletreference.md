@@ -10,6 +10,12 @@ dateCreated: 2025-12-15T20:06:57.029Z
 
 # JSF / Facelet tricks
 
+## Dialog sizing properly with scrollbars
+
+```
+  width="90%" height="90vh" fitViewport="true" responsive="true"
+```
+
 ## Dialog errors
 Prevent a dialog from closing if there are validation errors:
 ```
