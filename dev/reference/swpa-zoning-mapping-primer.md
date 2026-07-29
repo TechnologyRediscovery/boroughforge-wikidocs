@@ -1,3 +1,13 @@
+---
+title: Zoning in Southwest PA primer
+description: LLM generated discussion of zone boundaries, muni vs. state
+published: true
+date: 2026-07-29T017:53:37.675Z
+tags: 
+editor: markdown
+dateCreated: 2026-07-29T017:53:37.675Z
+---
+
 # Zoning in Southwestern Pennsylvania: A Primer for Spatial Data Modeling
 
 *Prepared for the BoroughForge/CodeNforce slippy-map project (PostGIS + Martin + Node). July 2026. Drafted by Fable 5 on 29-JUL-2026 with ECD edits and comments in the database structure sections. VERIFY all information within using authoritative sources*
