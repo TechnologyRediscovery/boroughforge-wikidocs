@@ -12,6 +12,29 @@ dateCreated: 2026-07-21T21:20:00.000Z
 
 Reverse-chronological log of structural changes made to this doc repo (file moves, conversions, deletions). For product release notes, see [Release notes](/system/releases/releasenotes).
 
+## 2026-08-07
+
+- Created [dev/architecture/docs-overhaul-aug26.md](/dev/architecture/docs-overhaul-aug26) \u2014
+  a full proposal for the directory structure, subsystem registry, and page-type taxonomy
+  needed before the doc site scales to hundreds of pages. Answers the three open items in
+  `docbacklog.md` and amends the four-branch plan to five (`public` split out of `users`).
+- **Signed off** the five-branch model, `accounts` slug, `permitting`/`occupancy`/
+  `inspections` staying separate subsystems, `data-exchange` needing full `admin/` content,
+  `best-practices/` (not `playbooks/`) naming, and `cecase` as the migration pilot.
+- Deleted `occPermitApplicationUnitList.xhtml` (stray raw JSF source file, accidental).
+- Renamed `users/Basics/` → `users/basics/` for casing consistency (`git mv`); fixed
+  `home.html`'s `/users/hardware` link (was also missing the `basics` path segment) to
+  `/users/basics/hardware`.
+- Audited all 17 images in the root-level `/cecases/`, `/inspections/`, `/permitting/`,
+  `/properties/` folders by grepping every filename against the whole repo. Only 2 were
+  unreferenced (`properties/propgroups.png`, `inspections/addspacebytype.png`) — moved both
+  to a new root `xarchive/` folder (mirrors the `xarchive/` convention already used in the
+  codenforce Java repo for material not worth sorting). The remaining 15 are live and stay
+  put until each subsystem's own migration pass folds them into a proper `img/` folder.
+- Created [system/subsystem-registry.md](/system/subsystem-registry) — the canonical,
+  arabic-numbered subsystem list (21 subsystems across 5 categories, plus 2 unnumbered
+  cross-cutting/infra concerns), replacing the old Roman-numeral convention.
+
 ## 2026-07-21
 
 - **21:20h** — Flagged `system/releases/release_notes.xhtml` as redundant now that its content lives in `releasenotes.md` / `releasenotes-archive.md`; queued for manual deletion.

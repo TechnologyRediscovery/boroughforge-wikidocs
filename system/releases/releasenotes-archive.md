@@ -1,5 +1,5 @@
 ---
-title: CodeNforce release notes
+title: CodeNforce archived release notes
 description: Major and minor
 published: true
 date: 2025-12-21T02:39:44.807Z
