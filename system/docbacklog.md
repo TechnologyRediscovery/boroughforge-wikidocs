@@ -27,10 +27,16 @@ conventions are approved; migration is starting with `cecase` as the pilot subsy
    (amended from four: `public` split out of `users` as its own security boundary — see
    the overhaul plan §3). **Approved.**
 2. **Build a subsystem overview listing in `system/`** — **done**, see
-   [system/subsystem-registry.md](/system/subsystem-registry). Per-subsystem hub pages
-   (`system/subsystems/<slug>.md`) still need to be written as each subsystem migrates.
+   [system/subsystem-registry.md](/system/subsystem-registry). All 23 per-subsystem hub pages
+   (`system/subsystems/<slug>.md`) are **written 2026-08-07** — one flat batch, ahead of any
+   branch content existing.
 3. **Develop a template + plan for organizing subsystem docs within each branch** — decided
-   in the overhaul plan §§4–7; next up is applying it to the `cecase` pilot.
+   in the overhaul plan §§4–7. Spoke pages (`<branch>/subsystems/<slug>/overview.md`) are
+   **created on demand**, not pre-scaffolded: every hub page above already links to all four
+   branch spokes, so clicking a link for a spoke that doesn't exist yet is Wiki.js's own
+   "create this page" prompt — no empty stub files needed as placeholders. Full migration of
+   *existing* scattered content (see hygiene items below) is intentionally still backlogged
+   and does not block writing new spoke pages for new features.
 
 ## Immediate hygiene items found during the Aug 2026 review
 

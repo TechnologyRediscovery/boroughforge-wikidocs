@@ -34,6 +34,24 @@ Reverse-chronological log of structural changes made to this doc repo (file move
 - Created [system/subsystem-registry.md](/system/subsystem-registry) — the canonical,
   arabic-numbered subsystem list (21 subsystems across 5 categories, plus 2 unnumbered
   cross-cutting/infra concerns), replacing the old Roman-numeral convention.
+- Revised the registry per a second round of tweaks: collapsed `public-info` into `cear`
+  (moved to Public-facing), renamed `permit-applications` → `public-applications` (now
+  covers rental/permit/inspection/zoning intake), added `communication` and `search`,
+  moved `workflow-builder` into Supporting subsystems, added `import-export` to
+  Integration & Platform, and dropped the per-row `Branches` column in favor of one
+  explanatory paragraph (every subsystem gets `dev/`/`admin/`/`users/`; only
+  Public-facing subsystems also get `public/`). Renumbered everything into one flat
+  23-item arabic sequence.
+- Added an **X-series** convention for dev-only backend infrastructure concerns that
+  aren't customer-facing subsystems (`X1 session`, `X2 caching`, `X3 security`, `X4 db`,
+  `X5 server-architecture`, `X6 ui-mobile`) — folds in the two previously-unnumbered
+  cross-cutting rows and adds `session` (`SessionBean` + the `Session*Conductor` fleet +
+  the `navigateToPageCorrespondingToObject` sync router), `caching`, and `security`.
+  X-series entries graduate to the numbered list if they ever grow real admin-facing UI.
+- Wrote all 23 per-subsystem **hub pages** at `system/subsystems/<slug>.md`, each linking
+  out to its (not-yet-created) `dev/`/`admin/`/`users/`(`/public/`) spoke pages. Spoke
+  pages are deliberately **not** pre-scaffolded — they get created on demand the first
+  time a feature needs one, using the hub page's own links as the entry point.
 
 ## 2026-07-21
 

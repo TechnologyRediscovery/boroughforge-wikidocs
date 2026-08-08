@@ -1,7 +1,9 @@
 # Documentation Site Overhaul — Directory Structure & Taxonomy Plan (Aug 2026)
 
 ## Status: APPROVED 2026-08-07 — see §9 for sign-off. Root cleanup done; canonical registry
-created; subsystem-by-subsystem migration (starting with `cecase`) is next.
+finalized (23 subsystems + X-series); all 23 hub pages written. Remaining work is deliberately
+deferred and non-blocking: the deeper `cecase` migration pilot (existing content/images), and
+writing spoke pages as new features actually need them.
 
 This plan answers the open organizational questions carried over in
 [docbacklog.md](/system/docbacklog) ("Consolidate down to four main branches", "Build a
@@ -524,6 +526,13 @@ ECD Response 7-AUG-2026: Migration order can certainly start with ce cases.
       other 15 root-level images, which are live and get folded into per-subsystem `img/`
       folders during each subsystem's own migration pass instead.
 - [x] Fix `users/Basics/` → `users/basics/` casing and its one broken inbound link.
-- [ ] Pilot the full branch/subsystem/hub pattern on `cecase` (confirmed in §9) — **next up**,
-      including folding `cecases/*.png` into `users/subsystems/cecase/img/` and updating
-      `finetracking.md` / `letters.md` in the same pass.
+- [x] Write all 23 per-subsystem hub pages at `system/subsystems/<slug>.md` (one flat batch,
+      2026-08-07) — gives every subsystem a stable landing point and spoke links *before*
+      any branch content exists, so new feature work always has an obvious place to land.
+      Spoke pages are created on demand (clicking a hub's link to a not-yet-created spoke is
+      Wiki.js's own "create this page" flow) rather than pre-scaffolded as empty stubs.
+- [ ] Pilot the *full* branch/subsystem/hub pattern on `cecase` (confirmed in §9) — i.e. the
+      deeper migration pass: folding `cecases/*.png` into `users/subsystems/cecase/img/` and
+      updating `finetracking.md` / `letters.md` in the same pass. This is explicitly
+      **not** a blocker for documenting new features — it's the deferred cleanup of
+      *existing* scattered content, tracked separately from the hub-page scaffolding above.
