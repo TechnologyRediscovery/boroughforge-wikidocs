@@ -49,9 +49,16 @@ Reverse-chronological log of structural changes made to this doc repo (file move
   the `navigateToPageCorrespondingToObject` sync router), `caching`, and `security`.
   X-series entries graduate to the numbered list if they ever grow real admin-facing UI.
 - Wrote all 23 per-subsystem **hub pages** at `system/subsystems/<slug>.md`, each linking
-  out to its (not-yet-created) `dev/`/`admin/`/`users/`(`/public/`) spoke pages. Spoke
-  pages are deliberately **not** pre-scaffolded — they get created on demand the first
-  time a feature needs one, using the hub page's own links as the entry point.
+  out to its `dev/`/`admin/`/`users/`(`/public/`) spoke pages.
+- **Corrected course same day:** since the Wiki.js browser editor is never used for normal
+  editing (all content is authored via git), spoke pages can't be "created on demand" through
+  a Wiki.js prompt as first proposed — scaffolded all **77 spoke stub pages** instead
+  (`dev/subsystems/<slug>/overview.md`, `admin/...`, `users/...`, `public/...` for the 2
+  public-facing subsystems, plus 6 dev-only X-series stubs), each `published: false` and
+  marked `🚧 Stub`. `data-exchange`'s admin stub points at the already-migrated
+  `admin/westmc-data-exchange.md` instead of duplicating it. Documented the image-resource
+  convention (`img/` colocated per subsystem folder, relative links, nest `img/<page-slug>/`
+  past 3 images) as overhaul plan §8a.
 
 ## 2026-07-21
 

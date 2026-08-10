@@ -1,9 +1,13 @@
 # Documentation Site Overhaul — Directory Structure & Taxonomy Plan (Aug 2026)
 
 ## Status: APPROVED 2026-08-07 — see §9 for sign-off. Root cleanup done; canonical registry
-finalized (23 subsystems + X-series); all 23 hub pages written. Remaining work is deliberately
-deferred and non-blocking: the deeper `cecase` migration pilot (existing content/images), and
-writing spoke pages as new features actually need them.
+finalized (23 subsystems + X-series); all 23 hub pages plus all 77 branch/subsystem stub
+pages written (see §8b). **§11 migration TODO list drafted 2026-08-07** — covers the Letters
+fast-path launch, remaining root cleanup, the 22-file legacy HTML migration, link rewriting,
+and the static-link/nginx redirect implementation. **§11.1 (Letters fast-path) and §11.2
+(root directory cleanup) executed 2026-08-07 night** — see per-item checkmarks below. §11.3
+(22-file legacy HTML migration), §11.4 (link rewriting), §11.5 (static-link/nginx redirect),
+and §11.6 (`cecase` full pilot) remain not started, by design — deferred out of tonight's scope.
 
 This plan answers the open organizational questions carried over in
 [docbacklog.md](/system/docbacklog) ("Consolidate down to four main branches", "Build a
@@ -485,6 +489,45 @@ for the branch's own cross-cutting folders (`best-practices/`, `basics/`, `archi
 
 ---
 
+## 8a. Image resource convention
+
+Formalizes the pattern already in use at `users/permitting/img/op-cse-links/`:
+
+- Every subsystem folder (`<branch>/subsystems/<slug>/`) gets one `img/` directory as a
+  sibling to its pages, created the first time a page in that folder actually needs an
+  image — not pre-scaffolded, since empty directories aren't tracked by git anyway.
+- **Default:** images sit flat in `img/` (`img/some-diagram.png`) when the folder only has
+  one or two image-bearing pages.
+- **Nest a page-named subfolder** (`img/<page-slug>/`) the moment a single page needs 3+
+  dedicated screenshots, so a busy folder's `img/` doesn't become an unlabeled flat pile from
+  several different pages.
+- **Use relative links** (`img/file.png` or `img/<page-slug>/file.png`), not absolute Wiki.js
+  paths (`/users/permitting/img/...`) — relative links survive a folder rename; the older
+  `cecases/` content used absolute paths and should not be treated as the model to copy.
+- Images are **never shared across branches**, even for the same subsystem — duplicate
+  rather than reference across a branch boundary, consistent with §4's full-page-separation
+  reasoning.
+
+## 8b. Stub-page convention (2026-08-07)
+
+Since the Wiki.js browser editor is never used for normal editing (see
+[docs-flow-architecture.md](docs-flow-architecture.md)), "a place to put the docs" has to mean
+a file that already exists in git at the right path — there's no "create page" affordance to
+rely on later. So every subsystem's `dev/`, `admin/`, `users/` (and `public/` where
+applicable) spoke got a stub `overview.md` up front, in one batch, rather than created on
+demand:
+
+- `published: false` in frontmatter — hidden from live nav/search until real content lands;
+  flip to `true` when the page is actually written.
+- Every stub body carries a `🚧 Stub` marker, so `grep -rl "🚧 Stub"` finds everything still
+  unwritten.
+- `data-exchange`'s `admin/` stub is special-cased to point at the already-migrated
+  `admin/westmc-data-exchange.md` instead of duplicating content.
+- **Not** included in this pass: the four branch-root landing pages (`dev.md`/`admin.html`/
+  `home.html` → `dev/index.md` etc. per §8) and `best-practices/` folders — both involve
+  moving/renaming existing live content or have no concrete topic yet, a different risk
+  profile than pure new-file stubbing. Tracked as separate follow-ups.
+
 ## 9. Decisions (resolved 2026-08-07)
 
 1. Confirm the five-branch model (`dev/ admin/ users/ public/ system/`) and the `playbooks/`
@@ -527,12 +570,252 @@ ECD Response 7-AUG-2026: Migration order can certainly start with ce cases.
       folders during each subsystem's own migration pass instead.
 - [x] Fix `users/Basics/` → `users/basics/` casing and its one broken inbound link.
 - [x] Write all 23 per-subsystem hub pages at `system/subsystems/<slug>.md` (one flat batch,
-      2026-08-07) — gives every subsystem a stable landing point and spoke links *before*
-      any branch content exists, so new feature work always has an obvious place to land.
-      Spoke pages are created on demand (clicking a hub's link to a not-yet-created spoke is
-      Wiki.js's own "create this page" flow) rather than pre-scaffolded as empty stubs.
+      2026-08-07) — gives every subsystem a stable landing point and spoke links before any
+      branch content exists.
+- [x] Scaffold all 77 branch/subsystem stub pages (`<branch>/subsystems/<slug>/overview.md`,
+      2026-08-07, see §8b) — `published: false`, marked 🚧 Stub — since Wiki.js's browser
+      editor is never used, the stub file itself (not a UI prompt) is what makes a subsystem
+      a real place to write new-feature docs into tonight.
 - [ ] Pilot the *full* branch/subsystem/hub pattern on `cecase` (confirmed in §9) — i.e. the
       deeper migration pass: folding `cecases/*.png` into `users/subsystems/cecase/img/` and
       updating `finetracking.md` / `letters.md` in the same pass. This is explicitly
       **not** a blocker for documenting new features — it's the deferred cleanup of
-      *existing* scattered content, tracked separately from the hub-page scaffolding above.
+      *existing* scattered content, tracked separately from the stub scaffolding above.
+
+---
+
+## 11. Migration TODO list (drafted 2026-08-07 — pending review before execution)
+
+This section plans out the full push from "stub pages exist" to "real content, real links,
+real redirects." Nothing below has been executed yet unless explicitly marked **DONE**. It is
+ordered so the Letters launch (this weekend) is not blocked by, and does not have to wait for,
+the rest of the repo-wide cleanup.
+
+### 11.0 Why Letters jumps the queue
+
+The engineering side of the `letters` subsystem (registry #12) has landed an enormous amount
+of scope since the existing docs were written — see
+`codenforce/docs/subsystems/letters+emailing/letterSubsystem-remainingWork-aug2026.md`: PDF
+generation at finalization, email delivery via Resend (+ webhooks), unified mail/email/
+posting/door-hanger distribution history, the two-path clone workflow, and a **user-visible
+rename of the panel header from "Letters" to "Correspondence."** None of this exists in the
+docs yet. The only existing user-facing content, `users/cecases/letters.md`, covers just the
+January 2026 generic-officer-signature feature on CE-case letters — it doesn't mention
+property/permit-file letters, mail merge, cloning, PDF, email, or the distribution history
+panel at all. Users are about to see a renamed panel and several brand-new capabilities with
+zero documentation. This is the actual near-term goal driving all of §11: get real pages
+in place, then wire the static-link redirect layer to them.
+
+### 11.1 Phase 0 — Letters fast-path (target: this weekend)
+
+**DONE 2026-08-07 night.** One deviation from the original plan below: while migrating
+`users/cecases/letters.md`, its content turned out to be mixed-audience (setup steps are
+admin-only, per §4's full-page-separation policy) — it was split into two files instead of
+one: `admin/subsystems/letters/generic-officer-signatures.md` (setup) and
+`users/subsystems/letters/generic-officer-signatures.md` (day-to-day usage), cross-linked to
+each other. Images split accordingly: `noneinjected.png`/`genericloaded.png` →
+`admin/subsystems/letters/img/`, `letterwithgenericsigner.png` → `users/subsystems/letters/img/`.
+The codenforce-repo `helpLinkCC` wiring item remains an open follow-up, not done tonight.
+
+Runs independently of every other phase below — do not wait on root cleanup or the other 21
+legacy HTML pages.
+
+- [x] Rewrite `users/subsystems/letters/overview.md` (currently a ð§ stub) for the full
+      current feature set, in plain end-user language: letters on CE cases, properties, and
+      permit files; mail-merge template fields; the clone/two-path workflow; PDF generation at
+      finalization; the **Correspondence** distribution-history panel (mail, email, posting/
+      placard, door-hanger); email delivery status badges. Source material: `LetterCoordinator`
+      + `letterTableCC.xhtml` + `letterFlow.xhtml` in the codenforce repo, translated — not
+      copied — into task-oriented language (no JDBC/coordinator terms).
+- [x] Migrate `users/cecases/letters.md` (generic-signer content, still accurate) — split per
+      the deviation noted above into `admin/subsystems/letters/generic-officer-signatures.md`
+      and `users/subsystems/letters/generic-officer-signatures.md`. Images moved from root
+      `cecases/` into the two new `img/` folders, `![]()` references rewritten to relative
+      `img/...` links (see §8a), old file deleted.
+- [x] Write new task pages under `users/subsystems/letters/`, split by task (per §5, not one
+      giant page):
+  - `generating-and-sending-a-letter.md` — clone/two-path chooser, mail-merge fields, step
+    2–4 flow.
+  - `distributing-a-letter.md` — the unified **Correspondence** panel: mailing, email
+    (suggest-and-confirm address), posting/placard + door-hanger with evidence photo upload.
+  - `printing-a-letter.md` — short page, cross-linking to `users/basics/printing.md` rather
+    than duplicating general printing instructions.
+- [x] Write real content for `admin/subsystems/letters/overview.md` — template management
+      (`letterTemplateManager.xhtml`), print orientation/format, court-documentation flag.
+- [x] Flip `published: true` on every page actually written; leave anything not written this
+      weekend as the existing `published: false` stub — do not publish partial/inaccurate
+      pages just to hit a deadline.
+- [x] Confirm the `system/subsystems/letters.md` hub page's spoke links still resolve (they
+      already point at `overview.md` for each branch — no hub edit needed unless new page
+      slugs replace `overview.md` as the primary landing page for a branch).
+- [ ] Cross-repo dependency (codenforce, not this repo): the new Letters UI panels don't yet
+      call `<cnf:helpLinkCC>` anywhere — that composite component doesn't exist yet either (see
+      §11.4). Wiring in-app help links is **not required** to ship docs this weekend; users can
+      be pointed at the docs site directly (e.g. via the existing user guide / announcement)
+      until the stable-ID layer is live. Track the JSF wiring as a follow-up codenforce-repo
+      task once §11.4 exists.
+
+### 11.2 Phase 1 — Root directory cleanup
+
+**DONE 2026-08-07 night** (the two checklist items below covering the three referenced-image
+groups remain intentionally unchecked — they move with their owning subsystem in §11.3, not
+tonight). All five orphans (`cnfpropprofilehome.png`, `login-logo.png`, `logo-n_font.png`,
+`property_page_diagram_2025.pdf`, `tbedit.png`) plus the reviewed `letterAddresseeJumbledInFlow.png`
+are now in `xarchive/`. `admin.html` → `admin/index.md`, `home.html` → `users/index.md`,
+`dev.md` → `dev/index.md` (with a new "Around here" links section added, since `dev/` has
+grown substantially), and a net-new `public/index.md` were all created; the two old `.html`
+files were deleted via plain `rm`.
+
+Audited every loose file at repo root against real inbound references (grep, not guesswork)
+before deciding move-vs-archive:
+
+| Root file | Referenced by | Disposition |
+|---|---|---|
+| `google_chrome_logo_with_wordmark_(2015).svg.png` | `users/basics/hardware.md` | Move to `users/basics/img/` when `hardware.md` is next touched |
+| `tbaccess.png`, `tbtoolsandblocklist.png`, `tbdetail.png`, `tblinktoord.png`, `tbexport.png`, `sampleexport.png` | `users/code/textblocks.md` | Move together with that page into `users/subsystems/codebook/img/` during the `codebook` migration pass (§11.3) |
+| `property_page_diagram_2025.png` | `users/properties.md` | Move into `users/subsystems/property/img/` during the `property` migration pass |
+| `cnfpropprofilehome.png` | *(none found)* | Orphan — move to `xarchive/` |
+| `login-logo.png` | *(none found)* | Orphan — move to `xarchive/` |
+| `logo-n_font.png` | *(none found)* | Orphan — move to `xarchive/` |
+| `property_page_diagram_2025.pdf` | *(none found — the `.png` sibling is referenced, this source file is not)* | Likely a design source file, not a doc asset — move to `xarchive/` rather than delete |
+| `tbedit.png` | *(none found — `textblocks.md` has no dedicated edit-step screenshot)* | Orphan — move to `xarchive/` |
+| `letterAddresseeJumbledInFlow.png` | *(none found)* | **Flagged, not auto-archived** — name suggests a Letters addressee-flow screenshot; worth a quick look during the Phase 0 Letters write-up before deciding whether it's useful source material or genuinely dead. See open decision D5. |
+
+- [x] Move the five genuinely-orphaned images plus the `.pdf` above into `xarchive/`.
+- [x] Review `letterAddresseeJumbledInFlow.png` during Phase 0 (D5) before archiving it —
+      viewed it; it confirmed the exact 4-step wizard labels used in
+      `generating-and-sending-a-letter.md`, but the screenshot itself contains test/placeholder
+      text unsuitable for publication, so it was archived rather than used as a doc image.
+- [ ] The three referenced-image groups above move as part of their *owning subsystem's*
+      migration pass in §11.3, not as a standalone image sweep — consistent with the existing
+      §0/§8 policy for `cecases/`, `permitting/`, `inspections/`.
+- [x] Convert `admin.html`, `home.html`, `dev.md` into the four branch-root landing pages
+      (`admin/index.md`, `users/index.md`, `dev/index.md`, plus a new `public/index.md`).
+      `home.html`'s content ("CodeNforce User Guide" table of contents) is already, in
+      substance, what `users/index.md` should be — this is largely a rename + frontmatter
+      conversion, not a rewrite. `admin.html` becomes `admin/index.md` similarly. `dev.md`
+      needs review since `dev/` content has grown substantially since it was written.
+      `public/index.md` is net-new (no legacy source page). Treat all four as living documents
+      per §8's guidance from here forward.
+
+### 11.3 Phase 2 — Legacy HTML → Markdown, sorted into subsystem folders
+
+All 22 `.html` (CKEditor/Scribe) pages, mapped to their destination. ⚠ flags a naming or
+content issue to resolve *during* that file's migration, not before:
+
+| Legacy file | Subsystem | New path |
+|---|---|---|
+| `users/cecases.html` | `cecase` (#10) | `users/subsystems/cecase/overview.md` (merge with existing stub; folds in alongside `caseload_manager.md`, `finetracking.md` per the §9 cecase pilot) |
+| `users/basics/user-login.html` | *(basics, no subsystem)* | `users/basics/user-login.md` |
+| `users/basics/dashboard-overview.html` | *(basics)* | `users/basics/dashboard-overview.md` |
+| `users/basics/printing.html` | *(basics)* | `users/basics/printing.md` |
+| `admin/user.html` | `accounts` (#1) | `admin/subsystems/accounts/overview.md` (merge with stub) |
+| `admin/user/umaps.html` | `accounts` (#1) | `admin/subsystems/accounts/umaps.md` |
+| `users/permitting/creating-permit-files.html` | `permitting` (#8) | `users/subsystems/permitting/creating-permit-files.md` |
+| `users/person-tools/person-search.html` | `person` (#5) | `users/subsystems/person/person-search.md` |
+| `users/person-tools/persons-to-properties.html` | `person` (#5) | `users/subsystems/person/persons-to-properties.md` — ⚠ review overlap with the row below (D3) |
+| `users/person-tools/updating-person-property-links.html` | `person` (#5) | `users/subsystems/person/updating-person-property-links.md` |
+| `users/properties/session-property.html` | `property` (#4) | `users/subsystems/property/session-property.md` (cross-link X1 `session`) |
+| `users/properties/parcelinfo.html` | `property` (#4) | `users/subsystems/property/parcel-info.md` |
+| `users/properties/users.html` *(titled "Property Search")* | `property` (#4) | `users/subsystems/property/property-search.md` — ⚠ filename doesn't match title, rename on migration |
+| `users/properties/creating-a-property-linking-mailing-address.html` | `property` (#4) | `users/subsystems/property/creating-a-property-linking-mailing-address.md` |
+| `users/properties/groups.html` | `property` (#4) | `users/subsystems/property/property-groups.md` |
+| `users/properties/new-page.html` *(titled "Add a Property Alert")* | `property` (#4) | `users/subsystems/property/add-a-property-alert.md` — ⚠ leftover default filename, rename on migration |
+| `users/properties/reporting.html` | `property` (#4) | `users/subsystems/property/property-reporting.md` (cross-link `reporting` #14) |
+| `users/properties/unit-configuration.html` | `property` (#4) | `users/subsystems/property/unit-configuration.md` |
+| `users/properties/connecting-people-to-properties.html` | `property` (#4) | `users/subsystems/property/connecting-people-to-properties.md` — ⚠ review overlap with `persons-to-properties.html` above (D3) |
+| `users/properties/add-an-event.html` | `property` (#4) | `users/subsystems/property/add-an-event.md` (cross-link `event` #6) |
+| `users/code/textblocks.md` *(already markdown, not `.html`, but not yet moved)* | `codebook` (#3) | `users/subsystems/codebook/textblocks.md` |
+
+(`admin.html`, `home.html` are handled in §11.2 above as branch-root landing pages, not
+subsystem pages.)
+
+- [ ] Convert each CKEditor/Scribe page's frontmatter to the standard convention (§ frontmatter
+      block already in use elsewhere) and `editor: markdown`.
+- [ ] Many Scribe-generated pages (`users/properties/*.html`) embed screenshots hosted on
+      `colony-recorder.s3.amazonaws.com` (a third-party service), not local files — see open
+      decision D4 before deciding whether to download and rehost each image under the page's
+      new `img/` folder, or leave the external links as-is for now.
+- [ ] One file per commit (or one subsystem's batch per commit) is strongly preferred over one
+      giant migration commit — easier to review and to revert a single page if something's off.
+
+### 11.4 Phase 3 — Link rewriting mechanics
+
+- [ ] After each page moves, grep the **whole repo** for its old path (both the `.html` path
+      and, for images, the old absolute `/rootfolder/file.png` form) before deleting the old
+      file — catches inbound links from pages that aren't moving in the same commit.
+- [ ] Absolute Wiki.js image paths (`/cecases/actiondate.png`) become relative (`img/file.png`)
+      per §8a — this is the bulk of the rewriting work, since nearly every legacy page uses
+      absolute paths.
+- [ ] Internal page-to-page links (e.g. `home.html`'s `<a href="/users/properties">`) get
+      rewritten to the new subsystem path once the target has moved — do this link-by-link as
+      each target subsystem is migrated, not as a guess-ahead pass.
+- [ ] Run a repo-wide link-check pass (per §8's existing recommendation — simple grep-based
+      script, no hosted service needed) once Phase 2 is complete, to catch anything missed.
+
+### 11.5 Phase 4 — Static-link redirect system (nginx + `helpmap/`)
+
+This is the piece the weekend push is ultimately building toward, but it has real
+infrastructure dependencies this repo alone can't satisfy — VPS access, DNS, and GitHub Actions
+secrets are the user's to provision, not something executable from here. What **can** be
+drafted in-repo ahead of time:
+
+- [ ] Create `helpmap/_redirects` (format defined in
+      [static-link-redirect-architecture.md](../wiki.js/static-link-redirect-architecture.md))
+      seeded with real entries for the new Letters pages once they exist, e.g.:
+      `letters-generate-send   /users/subsystems/letters/generating-and-sending-a-letter` and
+      `letters-distribute      /users/subsystems/letters/distributing-a-letter`.
+- [ ] Create `helpmap/generate-helplinks-nginx.sh` exactly as specified in that architecture
+      doc.
+- [ ] Create `.github/workflows/deploy-helplinks.yml`.
+- [ ] **Needs the repo owner, not the agent:** provisioning nginx + certbot on the docs VPS,
+      DNS for `docs.boroughforge.com`, and the three GitHub Actions secrets
+      (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`). Flag when ready to do this together.
+- [ ] **Cross-repo, codenforce Java repo:** build the `helpLinkCC` composite component and wire
+      `<cnf:helpLinkCC helpId="..."/>` into the new Letters panels (`letterTableCC.xhtml`,
+      `letterFlow.xhtml`). Not required to ship docs this weekend (11.0's last item) — the
+      redirect layer can go live and be linked to manually from the docs site before any JSF
+      page references it.
+
+### 11.6 Phase 5 — `cecase` full pilot (as already planned in §9/§10)
+
+Unchanged from §10's existing item, sequenced after Phase 0 pulls the letters-specific content
+and images out of `users/cecases/` first: fold the remaining `cecases/*.png`
+(`actiondate.png`, `fineeventattached.png`, `finepaid.png`, `finepaidinlist.png`,
+`selectfineamounteventcat.png`) into `users/subsystems/cecase/img/`, and migrate
+`caseload_manager.md` / `finetracking.md` into `users/subsystems/cecase/`.
+
+### 11.7 Sequencing
+
+```mermaid
+flowchart TD
+    P0[Phase 0: Letters fast-path] -->|extracts letters.md + 3 images out of cecases/| P5
+    P1[Phase 1: Root cleanup + branch-root landing pages] --> P2
+    P2[Phase 2: 22 legacy HTML pages -> subsystem folders] --> P3
+    P3[Phase 3: Link rewriting] --> P4
+    P0 --> P4[Phase 4: nginx / helpmap redirect layer]
+    P5[Phase 5: cecase full pilot] --> P3
+```
+
+Phase 0 (Letters) and Phase 1 (root cleanup) can run in parallel — neither blocks the other.
+Phase 4 (redirects) only strictly needs *some* real pages to point at — Phase 0's Letters
+pages are enough to go live with a first, small `helpmap/_redirects`; it doesn't need to wait
+for Phases 2/3/5 to finish.
+
+### 11.8 Open decisions for review
+
+1. **Promote `letters` ahead of `cecase` as the fast-tracked launch subsystem** (©11.0),
+   running in parallel with — not replacing — the `cecase` full-pattern pilot from §9 decision
+   5. Confirm?
+2. **Rename two misnamed legacy files** during migration (`new-page.html` →
+   `add-a-property-alert.md`, `users.html` → `property-search.md`) — confirm no external
+   inbound links (bookmarks, JSF help links, Scribe share links) depend on the old filenames.
+3. **Dedup review**: `persons-to-properties.html` vs. `connecting-people-to-properties.html` —
+   merge into one page, or keep both if they cover genuinely distinct scope?
+4. **Externally-hosted Scribe screenshots** (`colony-recorder.s3.amazonaws.com`) on the
+   `users/properties/*.html` pages — download and rehost locally per page (recommended, avoids
+   depending on a third party's continued hosting) vs. leave as external links for now?
+5. **`letterAddresseeJumbledInFlow.png`** (orphaned root image) — review as possible source
+   material for the new Letters docs before archiving to `xarchive/`.
+6. **nginx/VPS provisioning timeline** (§11.5) — when to schedule the hands-on infra session,
+   since it needs the user directly (SSH access, DNS, GitHub secrets).

@@ -31,12 +31,14 @@ conventions are approved; migration is starting with `cecase` as the pilot subsy
    (`system/subsystems/<slug>.md`) are **written 2026-08-07** — one flat batch, ahead of any
    branch content existing.
 3. **Develop a template + plan for organizing subsystem docs within each branch** — decided
-   in the overhaul plan §§4–7. Spoke pages (`<branch>/subsystems/<slug>/overview.md`) are
-   **created on demand**, not pre-scaffolded: every hub page above already links to all four
-   branch spokes, so clicking a link for a spoke that doesn't exist yet is Wiki.js's own
-   "create this page" prompt — no empty stub files needed as placeholders. Full migration of
-   *existing* scattered content (see hygiene items below) is intentionally still backlogged
-   and does not block writing new spoke pages for new features.
+   in the overhaul plan §§4–7. **Done 2026-08-07:** all 77 spoke stubs
+   (`<branch>/subsystems/<slug>/overview.md`) written in one batch — `published: false`,
+   marked `🚧 Stub`, ready to be filled in and flipped to `published: true` as real content is
+   written. (Correction from the same-day earlier note: since the Wiki.js browser editor is
+   never used for normal editing, "create the page on demand" isn't a real option here — the
+   file has to already exist in git. See overhaul plan §8b.) Full migration of *existing*
+   scattered content (see hygiene items below) is intentionally still backlogged and does not
+   block writing into these stubs for new features.
 
 ## Immediate hygiene items found during the Aug 2026 review
 
