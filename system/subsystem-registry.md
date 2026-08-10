@@ -1,3 +1,13 @@
+---
+title: Subsystem registry
+description: The canonical list of CodeNforce's subsystems
+published: true
+date: 2026-07-21T21:20:00.000Z
+tags: 
+editor: markdown
+dateCreated: 2026-07-21T21:20:00.000Z
+---
+
 # CodeNforce Subsystem Registry
 
 This is the canonical list of subsystems for the `boroughforge-wikidocs` site. Every
