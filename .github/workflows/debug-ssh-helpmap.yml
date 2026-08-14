@@ -1,0 +1,30 @@
+name: Debug SSH connectivity (temporary)
+
+# Throwaway workflow for diagnosing the helpmap-ci SSH setup — delete this file once
+# deploy-helplinks.yml is working reliably. Uses the raw OpenSSH client directly (no
+# marketplace action in between) so `-vvv` gives an unfiltered view of exactly where the
+# handshake fails: key rejected vs. connection timeout vs. host key mismatch, etc.
+on:
+  workflow_dispatch:
+
+jobs:
+  ssh-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write the deploy key to disk
+        run: |
+          mkdir -p ~/.ssh
+          # printf, not echo -e: preserves the key's exact newlines without a shell interpreting
+          # backslash escapes differently across runner images.
+          printf '%s\n' "${{ secrets.DOCS_VPS_SSH_KEY }}" > ~/.ssh/helpmap_ci_deploy
+          chmod 600 ~/.ssh/helpmap_ci_deploy
+
+      - name: Verbose SSH connection test
+        run: |
+          ssh -vvv \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=accept-new \
+            -o ConnectTimeout=10 \
+            -i ~/.ssh/helpmap_ci_deploy \
+            "${{ secrets.DOCS_VPS_USER }}@${{ secrets.DOCS_VPS_HOST }}" \
+            "echo SSH OK: \$(whoami)@\$(hostname)"

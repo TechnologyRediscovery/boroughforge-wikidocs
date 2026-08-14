@@ -8,6 +8,9 @@ on:
     paths:
       - 'helpmap/_redirects'
       - 'helpmap/generate-helplinks-nginx.sh'
+  # Lets you re-run this from the Actions tab without needing a real push while debugging
+  # SSH connectivity below. Safe to leave in permanently as a manual "redeploy now" button.
+  workflow_dispatch:
 
 # Design doc: dev/wiki.js/static-link-redirect-architecture.md §CI/CD
 # Build/deploy runbook: docs/subsystems/documentation/SL-2-helplinks-cicd.md (codenforce repo)
@@ -30,6 +33,7 @@ jobs:
           key: ${{ secrets.DOCS_VPS_SSH_KEY }}
           source: "helpmap/_redirects,helpmap/generate-helplinks-nginx.sh"
           target: "/home/${{ secrets.DOCS_VPS_USER }}/helpmap-deploy"
+          debug: true  # TEMP while diagnosing the SSH failure — remove once deploys work reliably
 
       - name: Generate Nginx config and reload
         uses: appleboy/ssh-action@v1.0.3
@@ -37,6 +41,7 @@ jobs:
           host: ${{ secrets.DOCS_VPS_HOST }}
           username: ${{ secrets.DOCS_VPS_USER }}
           key: ${{ secrets.DOCS_VPS_SSH_KEY }}
+          debug: true  # TEMP while diagnosing the SSH failure — remove once deploys work reliably
           script: |
             chmod +x ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh
             sudo ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh \
