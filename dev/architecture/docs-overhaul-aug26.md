@@ -798,17 +798,19 @@ infrastructure dependencies this repo alone can't satisfy — VPS access, DNS, a
 secrets are the user's to provision, not something executable from here. What **can** be
 drafted in-repo ahead of time:
 
-- [ ] Create `helpmap/_redirects` (format defined in
-      [static-link-redirect-architecture.md](../wiki.js/static-link-redirect-architecture.md))
-      seeded with real entries for the new Letters pages once they exist, e.g.:
-      `letters-generate-send   /users/subsystems/letters/generating-and-sending-a-letter` and
-      `letters-distribute      /users/subsystems/letters/distributing-a-letter`.
-- [ ] Create `helpmap/generate-helplinks-nginx.sh` exactly as specified in that architecture
+- [x] Create `helpmap/_redirects` (format defined in
+      [static-link-redirect-architecture.md](../wiki.js/static-link-redirect-architecture.md)) —
+      seeded with the 21 SL.0 stable IDs (12 confirmed targets, 9 `# TODO` pending page
+      confirmation), not the Letters IDs (those belong to a separate, later pass).
+- [x] Create `helpmap/generate-helplinks-nginx.sh` exactly as specified in that architecture
       doc.
-- [ ] Create `.github/workflows/deploy-helplinks.yml`.
-- [ ] **Needs the repo owner, not the agent:** provisioning nginx + certbot on the docs VPS,
-      DNS for `docs.codenforce.org`, and the three GitHub Actions secrets
-      (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`). Flag when ready to do this together.
+- [x] Create `.github/workflows/deploy-helplinks.yml` — 2026-08-14, see
+      [SL-2-helplinks-cicd.md](../../../codenforce/docs/subsystems/documentation/SL-2-helplinks-cicd.md)
+      (codenforce repo) for the full runbook.
+- [X 14AUG26 ] **Needs the repo owner, not the agent:** provisioning nginx + certbot on the docs VPS
+      (in progress, see codenforce `SL-1-nginx-tls-vps.md`), DNS for `docs.codenforce.org`, and
+      the three GitHub Actions secrets (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`) plus
+      a scoped sudoers entry on the VPS. Flag when ready to do this together.
 - [ ] **Cross-repo, codenforce Java repo:** build the `helpLinkCC` composite component and wire
       `<cnf:helpLinkCC helpId="..."/>` into the new Letters panels (`letterTableCC.xhtml`,
       `letterFlow.xhtml`). Not required to ship docs this weekend (11.0's last item) — the

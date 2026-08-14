@@ -1,0 +1,37 @@
+# codeNforce help link redirect map
+# Format:  stable-id   target-path-on-wiki
+# Rules:
+#   - stable IDs are permanent — never rename or delete a line, only change target
+#   - use # TODO if target wiki page is not yet published (redirect falls back to homepage)
+#   - anchors belong in the target path column: occ-permit-files /users/permitting/permit-files#overview
+#
+# See: docs/subsystems/documentation/SL-2-helplinks-cicd.md (codenforce repo) for the full
+# build/deploy runbook, and dev/wiki.js/static-link-redirect-architecture.md (this repo) for
+# the design doc these 21 stable IDs come from.
+
+# --- Original 12 (design-phase IDs, targets confirmed) ---
+cecase-events-add           /users/cecases/add-an-event
+cecase-cross-muni           /users/cecases/cross-municipality
+cecase-cears-internal       /users/cecases/cears-internal
+dashboard-case-priority     /users/cecases/case-priority-color-scheme
+dashboard-case-search       /users/cecases/case-search
+inspections-fins            /inspections/fins
+code-enter-ordinance        /dev/code/enter-ordinance
+code-add-to-codebook        /dev/code/add-to-codebook
+code-create-checklist       /dev/code/create-checklist
+property-persons-link       /users/properties/connecting-people-to-properties
+occ-permit-files            /users/permitting/permit-files
+occ-permit-generate         /users/permitting/generate-permit
+
+# --- 9 newly discovered (SL.0 re-inventory) — targets not yet assigned/confirmed ---
+# Uncomment and fix the path once each wiki page is confirmed published (see SL-2 impl file
+# "Remaining target assignment" section for candidate pages found during SL.2 setup).
+# TODO property-mark-abandoned          /users/subsystems/property/parcel-info
+# TODO cecase-upload-files              (candidate page not yet confirmed)
+# TODO cecase-add-violation             (candidate page not yet confirmed)
+# TODO cecase-nov-add-address           (candidate page not yet confirmed)
+# TODO cecase-nov-prepare               (candidate page not yet confirmed)
+# TODO cecase-nov-add-person            (candidate page not yet confirmed)
+# TODO property-link-mailing-address    /users/subsystems/property/creating-a-property-linking-mailing-address
+# TODO property-link-multiple-people    /users/subsystems/person/updating-person-property-links
+# TODO cecase-management-overview       (candidate page not yet confirmed)

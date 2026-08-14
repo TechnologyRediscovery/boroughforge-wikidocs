@@ -1,0 +1,44 @@
+name: Deploy help link redirects
+
+# Fires only when the two files that make up the redirect map actually change — editing any
+# other page on the wiki does not touch nginx at all.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'helpmap/_redirects'
+      - 'helpmap/generate-helplinks-nginx.sh'
+
+# Design doc: dev/wiki.js/static-link-redirect-architecture.md §CI/CD
+# Build/deploy runbook: docs/subsystems/documentation/SL-2-helplinks-cicd.md (codenforce repo)
+# Required repo secrets (Settings → Secrets and variables → Actions), set up by the repo owner:
+#   DOCS_VPS_HOST     — public IP or hostname of the docs VPS
+#   DOCS_VPS_USER     — the deploy user (also needs a NOPASSWD sudoers entry for the generator
+#                       script only — see the SL-2 impl file)
+#   DOCS_VPS_SSH_KEY  — private key matching a public key already in that user's authorized_keys
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DOCS_VPS_HOST }}
+          username: ${{ secrets.DOCS_VPS_USER }}
+          key: ${{ secrets.DOCS_VPS_SSH_KEY }}
+          source: "helpmap/_redirects,helpmap/generate-helplinks-nginx.sh"
+          target: "/home/${{ secrets.DOCS_VPS_USER }}/helpmap-deploy"
+
+      - name: Generate Nginx config and reload
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DOCS_VPS_HOST }}
+          username: ${{ secrets.DOCS_VPS_USER }}
+          key: ${{ secrets.DOCS_VPS_SSH_KEY }}
+          script: |
+            chmod +x ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh
+            sudo ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh \
+              ~/helpmap-deploy/helpmap/_redirects \
+              /etc/nginx/conf.d/helplinks.conf
