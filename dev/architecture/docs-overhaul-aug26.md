@@ -710,6 +710,10 @@ before deciding move-vs-archive:
       substance, what `users/index.md` should be — this is largely a rename + frontmatter
       conversion, not a rewrite. `admin.html` becomes `admin/index.md` similarly. `dev.md`
       needs review since `dev/` content has grown substantially since it was written.
+      **Correction, 2026-08-14:** folding `home.html` into `users/index.md` left the actual
+      site root with no page at all — `docs.codenforce.org` was silently serving Wiki.js's
+      generic default splash. Added a genuine root `home.md` (distinct from `users/index.md`)
+      that fans out to all five branches; see the worklog for 2026-08-14.
       `public/index.md` is net-new (no legacy source page). Treat all four as living documents
       per §8's guidance from here forward.
 
@@ -803,7 +807,7 @@ drafted in-repo ahead of time:
       doc.
 - [ ] Create `.github/workflows/deploy-helplinks.yml`.
 - [ ] **Needs the repo owner, not the agent:** provisioning nginx + certbot on the docs VPS,
-      DNS for `docs.boroughforge.com`, and the three GitHub Actions secrets
+      DNS for `docs.codenforce.org`, and the three GitHub Actions secrets
       (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`). Flag when ready to do this together.
 - [ ] **Cross-repo, codenforce Java repo:** build the `helpLinkCC` composite component and wire
       `<cnf:helpLinkCC helpId="..."/>` into the new Letters panels (`letterTableCC.xhtml`,
