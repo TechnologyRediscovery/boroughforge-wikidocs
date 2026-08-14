@@ -46,4 +46,4 @@ jobs:
             chmod +x ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh
             sudo ~/helpmap-deploy/helpmap/generate-helplinks-nginx.sh \
               ~/helpmap-deploy/helpmap/_redirects \
-              /etc/nginx/conf.d/helplinks.conf
+              /etc/nginx/snippets/helplinks.conf
