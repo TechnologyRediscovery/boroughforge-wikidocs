@@ -10,10 +10,11 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
-## Release 5.0.0 on 29-July-2026
-- **LSA7-G: Workflow engine pre-release:** The rental registry and related occupancy workflow engine is now live for pre-release feedback and testing.
-- **LSA7-G: Muni-specific events:** Each muni can now create event categories specific to their municipality, and see those events in a special new event add tab called: muni-specific categories.
-- **LSA7-H:** Permit files and CE cases can now be formally linked when an occupancy situation becomes a court-mediated process. [See feature documentation here.](/users/permitting/linking-permit-files-to-ce-cases.md). Links made also appear in the CE case profile panel.
+## Release 5.0.0 on 12-2026
+- **LSA7-D Letters overhaul:** Our new letter subsystem includes a JPEG image compression tool! A letter with 8 images taken at full smartphone resolution was reduced from 55.2 MiB to 1.6 MiB! With automatic emailing of letters to recipients, the attached PDF shouldn't blow up any inboxes. AND, since we got compression working for new letters, auto-compression has now been extended to field inspection reports! Images viewed in normal browser view mode (the ugly off-center dialog) are NOT compressed at all--all pixes are sent to the browser for zooming way in. 
+- **LSA7-G Workflow engine pre-release:** The rental registry and related occupancy workflow engine is now live for pre-release feedback and testing.
+- **LSA7-G Muni-specific events:** Each muni can now create event categories specific to their municipality, and see those events in a special new event add tab called: muni-specific categories.
+- **LSA7-H Permit file case links** Permit files and CE cases can now be formally linked when an occupancy situation becomes a court-mediated process. [See feature documentation here.](/users/permitting/linking-permit-files-to-ce-cases.md). Links made also appear in the CE case profile panel.
 
 
 ## Release 4.8.9 on 24-July-2026

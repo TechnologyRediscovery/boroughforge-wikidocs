@@ -13,7 +13,7 @@ The following hardware and software specifications ensure compatibility with our
 
 ## Computer requirements for CNF browser application
 The primary CodeNforce tool is served to users via a standard web browser which means we are operating systems agnostic. The CNF officially supported browser is [Google Chrome](https://www.google.com/chrome/index.html) which provides builds for all major operating systems: Linux, Microsoft Windows, and Apple MacOS.
-![google_chrome_logo_with_wordmark_(2015).svg.png](/google_chrome_logo_with_wordmark_(2015).svg.png =200x)
+![google_chrome_logo_with_wordmark_(2015).svg.png](img/google_chrome_logo_with_wordmark_(2015).svg.png =200x)
 The CNF technical team recommends the following baseline computer hardware components to ensure a decent browser experience:
 * **16 GB RAM minimum** (Current version of Microsoft Windows is v. 11 which is outrageously RAM hungry and therefore does not work smoothly with only 8 GB ram)
 * Monitor resolution: 1600x900 (16:9) or 1680x1050 (16:10)

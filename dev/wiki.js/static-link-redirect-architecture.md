@@ -16,9 +16,19 @@ even as the underlying destination changes over time.
 ## Problem Statement
 
 codeNforce JSF/Facelets pages embed contextual help links pointing users to the BoroughForge
-documentation site. As of mid-2026, all 21 existing help links are hardcoded directly to
+documentation site. As of mid-2026, existing help links are hardcoded directly to
 `https://technologyrediscovery.github.io/codenforce/` — a GitHub Pages site being superseded
 by a Wiki.js instance on a dedicated DigitalOcean VPS.
+
+> **SL.0 re-inventory (2026-08-14).** This document originally estimated the migration scope at
+> 21 links across 13 files resolving to 12 unique targets. A full repo-wide re-scan ahead of
+> starting the SL build found the real footprint is **56 link occurrences across 29 XHTML files,
+> resolving to 21 unique stable-ID targets**. The undercount came from the original walk covering
+> only full restricted pages — it missed the `resources/components/*CC.xhtml` composite-component
+> duplicates that mirror several of those pages elsewhere (e.g. `propCasesCC.xhtml` alongside
+> `propCases.xhtml`, `eventListPanelCC.xhtml` alongside `eventListPanel.xhtml`). The corrected
+> tables below (§Initial ID Table, §Files to modify) reflect the real scope; the build (SL.1–SL.5)
+> proceeds from these corrected numbers.
 
 The naive replacement — swap one hardcoded base URL for another — reproduces the same structural
 fragility:
@@ -156,22 +166,38 @@ application and the docs system.
   handles the actual anchor: the ID `cecase-events-add` points to the full URL including `#add`
   in `helpmap/_redirects`
 
-### Initial ID table — migrating all 21 existing links (12 unique targets, 13 files)
+### Initial ID table — full re-inventoried scope (56 link occurrences, 29 files, 21 unique targets)
 
-| Stable ID | Legacy GitHub Pages path | Target wiki.js path |
-|---|---|---|
-| `cecase-cross-muni` | `/case/crossmuni.html` | *(assign when wiki page published)* |
-| `dashboard-case-priority` | `/dashboard/dashboard#case-priority-color-scheme` | *(assign when wiki page published)* |
-| `dashboard-case-search` | `/dashboard/dashboard#case-search` | *(assign when wiki page published)* |
-| `inspections-fins` | `/inspections/fins.html` | *(assign when wiki page published)* |
-| `code-enter-ordinance` | `/code/fullcodemodule#enter-an-ordinance-into-codenforce` | *(assign when wiki page published)* |
-| `code-add-to-codebook` | `/code/fullcodemodule#add-an-ordinance-to-a-code-book` | *(assign when wiki page published)* |
-| `code-create-checklist` | `/code/fullcodemodule#create-a-checklist` | *(assign when wiki page published)* |
-| `cecase-events-add` | `/case/casescreen#log-an-event` | *(assign when wiki page published)* |
-| `property-persons-link` | `/property/personslinking#link-a-person-to-a-property-or-case` | *(assign when wiki page published)* |
-| `cecase-cears-internal` | `/public/cears.html#internal-cear-management-tools` | *(assign when wiki page published)* |
-| `occ-permit-files` | `/occ/User_documentation_ACT#permit-files` | *(assign when wiki page published)* |
-| `occ-permit-generate` | `/occ/User_documentation_ACT#generate-an-occupancy-permit` | *(assign when wiki page published)* |
+Corrected 2026-08-14 (SL.0). `Occ.` = total link occurrences resolving to this ID; `Files` =
+distinct XHTML files containing at least one occurrence. The first 12 rows are the original
+design's IDs (unchanged); the following 9 rows are newly discovered by the re-inventory.
+
+| Stable ID | Legacy GitHub Pages path | Occ. | Files | Target wiki.js path |
+|---|---|---|---|---|
+| `cecase-cross-muni` | `/case/crossmuni.html` | 3 | 2 | *(assign when wiki page published)* |
+| `dashboard-case-priority` | `/dashboard/dashboard#case-priority-color-scheme` | 9 | 8 | *(assign when wiki page published)* |
+| `dashboard-case-search` | `/dashboard/dashboard#case-search` | 2 | 1 | *(assign when wiki page published)* |
+| `inspections-fins` | `/inspections/fins.html` | 2 | 1 | *(assign when wiki page published)* |
+| `code-enter-ordinance` | `/code/fullcodemodule#enter-an-ordinance-into-codenforce` | 2 | 1 | *(assign when wiki page published)* |
+| `code-add-to-codebook` | `/code/fullcodemodule#add-an-ordinance-to-a-code-book` | 2 | 1 | *(assign when wiki page published)* |
+| `code-create-checklist` | `/code/fullcodemodule#create-a-checklist` | 1 | 1 | *(assign when wiki page published)* |
+| `cecase-events-add` | `/case/casescreen#log-an-event` | 4 | 2 | *(assign when wiki page published)* |
+| `property-persons-link` | `/property/personslinking#link-a-person-to-a-property-or-case` | 6 | 4 | *(assign when wiki page published)* |
+| `cecase-cears-internal` | `/public/cears.html#internal-cear-management-tools` | 3 | 3 | *(assign when wiki page published)* |
+| `occ-permit-files` | `/occ/User_documentation_ACT#permit-files` | 2 | 1 | *(assign when wiki page published)* |
+| `occ-permit-generate` | `/occ/User_documentation_ACT#generate-an-occupancy-permit` | 2 | 1 | *(assign when wiki page published)* |
+| `property-mark-abandoned` *(new)* | `/property/personslinking#mark-a-property-as-abandoned` | 2 | 1 | *(assign when wiki page published)* |
+| `cecase-upload-files` *(new)* | `/case/casescreen#upload-files-and-photos` | 4 | 2 | *(assign when wiki page published)* |
+| `cecase-add-violation` *(new)* | `/case/casescreen#add-a-violation` | 2 | 1 | *(assign when wiki page published)* |
+| `cecase-nov-add-address` *(new)* | `/case/casescreen#link-a-new-address-when-creating-an-nov` | 2 | 1 | *(assign when wiki page published)* |
+| `cecase-nov-prepare` *(new)* | `/case/casescreen#prepare-a-notice-of-violation` | 1 | 1 | *(assign when wiki page published)* |
+| `cecase-nov-add-person` *(new)* | `/case/casescreen#add-a-new-person-when-creating-an-nov` | 2 | 1 | *(assign when wiki page published)* |
+| `property-link-mailing-address` *(new)* | `/property/personslinking#link-a-person-to-a-mailing-address` | 1 | 1 | *(assign when wiki page published)* |
+| `property-link-multiple-people` *(new)* | `/property/personslinking#link-multiple-people-to-a-property-or-case-at-once` | 2 | 1 | *(assign when wiki page published)* |
+| `cecase-management-overview` *(new)* | `/case/casescreen#code-enforcement-case-management` | 2 | 1 | *(assign when wiki page published)* |
+
+**Totals: 56 occurrences, 21 unique IDs.** (Per-file totals sum to 29 distinct files — see
+§Files to modify for the file-by-file breakdown.)
 
 ---
 
@@ -343,9 +369,9 @@ committing, and pushing. CI deploys in under 10 seconds. No Java, no Maven, no W
 
 ## JSF/XHTML Side: The `helpLinkCC` Composite Component
 
-All 21 existing links use an identical two-div structure — a material icon and a "help" text
-anchor side by side. Extract this into a Facelets composite component to enforce consistency and
-create a single change point for the docs base URL.
+All 56 existing link occurrences use an identical two-div structure — a material icon and a
+"help" text anchor side by side. Extract this into a Facelets composite component to enforce
+consistency and create a single change point for the docs base URL.
 
 **Component location**: `src/main/webapp/resources/components/helpLinkCC.xhtml`
 
@@ -391,7 +417,7 @@ xmlns:cnf="http://xmlns.jcp.org/jsf/composite/components"
 ```
 
 The base URL `https://docs.boroughforge.com` appears in exactly one place. If the domain ever
-changes: edit one file, recompile once — not 21 scattered XHTML files.
+changes: edit one file, recompile once — not 29 scattered XHTML files.
 
 ---
 
@@ -399,31 +425,51 @@ changes: edit one file, recompile once — not 21 scattered XHTML files.
 
 ### Files to modify
 
-13 XHTML files under `src/main/webapp/restricted/`:
+**29 XHTML files** (corrected by SL.0, 2026-08-14 — see the re-inventory note above), all
+under `src/main/webapp/`:
 
-| File | Link IDs to apply |
+| File (relative to `src/main/webapp/`) | Link IDs to apply |
 |---|---|
-| `navContainer_restricted.xhtml` | `cecase-cross-muni` |
-| `compositions/session/sessCECase.xhtml` | `dashboard-case-priority` |
-| `compositions/inspectionTools.xhtml` | `inspections-fins`, `dashboard-case-priority` (×2) |
-| `compositions/missioncontrol/missConCECaseSearch.xhtml` | `dashboard-case-search` (×2), `dashboard-case-priority` |
-| `cogstaff/code/codeElementManage.xhtml` | `code-enter-ordinance` (×2) |
-| `cogstaff/code/codeSetManage.xhtml` | `code-add-to-codebook` (×2) |
-| `cogstaff/event/compositions/eventListPanel.xhtml` | `cecase-events-add` (×2) |
-| `cogstaff/prop/compositions/propPersons.xhtml` | `property-persons-link` |
-| `cogstaff/prop/compositions/propCases.xhtml` | `dashboard-case-priority` |
-| `cogstaff/prop/compositions/propCEARS.xhtml` | `cecase-cears-internal` |
-| `cogstaff/occ/inspectionChecklistTools.xhtml` | `code-create-checklist` |
-| `cogstaff/occ/occPeriodWorkflow.xhtml` | `occ-permit-files` (×2) |
-| `cogstaff/occ/compositions/permitsPanel.xhtml` | `occ-permit-generate` |
+| `restricted/navContainer_restricted.xhtml` | `cecase-cross-muni` |
+| `restricted/compositions/session/sessCECase.xhtml` | `dashboard-case-priority` |
+| `restricted/compositions/inspectionTools.xhtml` | `inspections-fins` (×2), `dashboard-case-priority` |
+| `restricted/compositions/missioncontrol/missConCECaseSearch.xhtml` | `dashboard-case-search` (×2), `dashboard-case-priority` |
+| `restricted/cogstaff/code/codeElementManage.xhtml` | `code-enter-ordinance` (×2) |
+| `restricted/cogstaff/code/codeSetManage.xhtml` | `code-add-to-codebook` (×2) |
+| `restricted/cogstaff/event/compositions/eventListPanel.xhtml` | `cecase-events-add` (×2) |
+| `restricted/cogstaff/prop/compositions/propPersons.xhtml` | `property-persons-link` |
+| `restricted/cogstaff/prop/compositions/propCases.xhtml` | `dashboard-case-priority` |
+| `restricted/cogstaff/prop/compositions/propCEARS.xhtml` | `cecase-cears-internal` |
+| `restricted/cogstaff/occ/inspectionChecklistTools.xhtml` | `code-create-checklist` |
+| `restricted/cogstaff/occ/occPeriodWorkflow.xhtml` | `occ-permit-files` (×2) |
+| `restricted/cogstaff/occ/compositions/permitsPanel.xhtml` | `occ-permit-generate` (×2) |
+| `resources/components/cecaseInfoColumns.xhtml` *(new)* | `dashboard-case-priority` |
+| `resources/components/eventListPanelCC.xhtml` *(new)* | `cecase-events-add` (×2) |
+| `resources/components/propCasesCC.xhtml` *(new)* | `dashboard-case-priority` |
+| `resources/components/propCEARSCC.xhtml` *(new)* | `cecase-cears-internal` |
+| `resources/components/propInfoCC.xhtml` *(new)* | `property-mark-abandoned` (×2) |
+| `resources/components/propPersonsCC.xhtml` *(new)* | `property-persons-link` |
+| `restricted/cogstaff/ce/ceActionRequests.xhtml` *(new)* | `property-persons-link` (×2), `dashboard-case-priority` |
+| `restricted/cogstaff/ce/compositions/ceCaseBlobs.xhtml` *(new)* | `cecase-upload-files` (×2) |
+| `restricted/cogstaff/ce/compositions/ceCaseCEARPanel.xhtml` *(new)* | `cecase-cears-internal` |
+| `restricted/cogstaff/ce/compositions/ceCaseCodeViolations.xhtml` *(new)* | `cecase-add-violation` (×2) |
+| `restricted/cogstaff/ce/compositions/ceCaseInfo.xhtml` *(new)* | `dashboard-case-priority` (×2) |
+| `restricted/cogstaff/ce/compositions/ceCaseNoticesOfViolation.xhtml` *(new)* | `cecase-nov-add-address` (×2), `cecase-nov-prepare`, `cecase-nov-add-person` (×2) |
+| `restricted/cogstaff/ce/compositions/ceCasePersonLinks.xhtml` *(new)* | `property-persons-link` (×2) |
+| `restricted/cogstaff/ce/compositions/ceCaseQuickLinks.xhtml` *(new)* | `cecase-management-overview` (×2) |
+| `restricted/cogstaff/occ/compositions/occPeriodBlobs.xhtml` *(new)* | `cecase-upload-files` (×2) |
+| `restricted/cogstaff/person/compositions/personTools.xhtml` *(new)* | `property-link-mailing-address`, `cecase-cross-muni` (×2), `property-link-multiple-people` (×2) |
+
+`*(new)*` marks files missed by the original 13-file inventory — all `resources/components/*CC.xhtml`
+composite-component duplicates plus a handful of `ce/`-tree pages not walked the first time.
 
 ### Migration steps
 
 1. Create `helpLinkCC.xhtml` composite component.
-2. Add the 12 stable IDs to `helpmap/_redirects` with `# TODO` placeholders for target paths not
+2. Add the 21 stable IDs to `helpmap/_redirects` with `# TODO` placeholders for target paths not
    yet published to wiki; each `# TODO` entry should fall back to the docs homepage.
 3. Replace each hardcoded two-div `<a href="...technologyrediscovery.github.io...">` block in
-   each of the 13 files with `<cnf:helpLinkCC helpId="..." />`.
+   each of the 29 files with `<cnf:helpLinkCC helpId="..." />`.
 4. Build and deploy the WAR. This is the **one and only WAR deploy** required by this migration.
 5. As wiki pages are published, update `_redirects` entries (remove `# TODO`, add real path),
    push to GitHub. CI deploys with no WAR touch.

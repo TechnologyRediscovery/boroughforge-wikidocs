@@ -15,8 +15,8 @@ municipality running day-to-day.
 
 ## Getting started
 
-- [User config](/admin/user) — managing user accounts and their access to your municipality
-  (UMAPs).
+- [User config](/admin/subsystems/accounts/overview) — managing user accounts and their access
+  to your municipality (UMAPs).
 - Muni config — municipality-level settings (dedicated page not yet written; see the
   [municipality subsystem hub](/system/subsystems/municipality) in the meantime).
 - [Property data entry](/admin/propertydataentry) — bulk-adding and correcting property

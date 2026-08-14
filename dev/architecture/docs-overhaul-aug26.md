@@ -5,9 +5,21 @@ finalized (23 subsystems + X-series); all 23 hub pages plus all 77 branch/subsys
 pages written (see §8b). **§11 migration TODO list drafted 2026-08-07** — covers the Letters
 fast-path launch, remaining root cleanup, the 22-file legacy HTML migration, link rewriting,
 and the static-link/nginx redirect implementation. **§11.1 (Letters fast-path) and §11.2
-(root directory cleanup) executed 2026-08-07 night** — see per-item checkmarks below. §11.3
-(22-file legacy HTML migration), §11.4 (link rewriting), §11.5 (static-link/nginx redirect),
-and §11.6 (`cecase` full pilot) remain not started, by design — deferred out of tonight's scope.
+(root directory cleanup) executed 2026-08-07 night** — see per-item checkmarks below.
+**§11.3 (22-file legacy HTML migration) executed 2026-08-14** — all 7 subsystem batches
+(accounts, basics, permitting, person, property, codebook, cecase) migrated, old files/dirs
+deleted, images moved into per-subsystem `img/` folders, inbound links fixed; see per-row
+status in the §11.3 table and the resolved decisions in §11.8. §11.4's repo-wide grep pass was
+run as part of this cleanup (see §11.3 note). §11.5 (static-link/nginx redirect) and §11.6
+(`cecase` full pilot — the deeper `users/cecases/` folder + `cecases/*.png`, distinct from the
+single overview page migrated in §11.3) remain not started — still gated on VPS/DNS
+provisioning (§11.5) or a dedicated pilot pass (§11.6).
+
+**§12 (meta-organization flow) appended 2026-08-12** — specs three cross-repo tracking organs
+(a reverse-chrono **worklog**, a **subsystem-status dashboard**, and a **dev↔docs correlation
+policy**) plus the codenforce subsystem-slug alignment task. T1–T3 done 2026-08-12; T4–T7
+(registry crosswalk note, `status:planned` tag adoption, docbacklog row, codenforce dir-slug
+rename) remain open, not touched by the §11.3 cleanup pass.
 
 This plan answers the open organizational questions carried over in
 [docbacklog.md](/system/docbacklog) ("Consolidate down to four main branches", "Build a
@@ -686,9 +698,12 @@ before deciding move-vs-archive:
       viewed it; it confirmed the exact 4-step wizard labels used in
       `generating-and-sending-a-letter.md`, but the screenshot itself contains test/placeholder
       text unsuitable for publication, so it was archived rather than used as a doc image.
-- [ ] The three referenced-image groups above move as part of their *owning subsystem's*
+- [x] The three referenced-image groups above move as part of their *owning subsystem's*
       migration pass in §11.3, not as a standalone image sweep — consistent with the existing
-      §0/§8 policy for `cecases/`, `permitting/`, `inspections/`.
+      §0/§8 policy for `cecases/`, `permitting/`, `inspections/`. **Done 2026-08-14** as part of
+      §11.3: `google_chrome_logo_with_wordmark_(2015).svg.png` → `users/basics/img/`, the six
+      `tb*.png`/`sampleexport.png` textblock screenshots → `users/subsystems/codebook/img/`,
+      `property_page_diagram_2025.png` → `users/subsystems/property/img/`.
 - [x] Convert `admin.html`, `home.html`, `dev.md` into the four branch-root landing pages
       (`admin/index.md`, `users/index.md`, `dev/index.md`, plus a new `public/index.md`).
       `home.html`'s content ("CodeNforce User Guide" table of contents) is already, in
@@ -700,58 +715,77 @@ before deciding move-vs-archive:
 
 ### 11.3 Phase 2 — Legacy HTML → Markdown, sorted into subsystem folders
 
-All 22 `.html` (CKEditor/Scribe) pages, mapped to their destination. ⚠ flags a naming or
-content issue to resolve *during* that file's migration, not before:
+**DONE 2026-08-14.** All 22 planned rows below migrated, plus several additional "real
+content" files discovered sitting alongside them in the same flat folders (not in the original
+22-file count, folded in anyway per the "tidy while you're in there" goal):
+`users/permitting/managing-canned-cert-text.md`,
+`users/permitting/linking-permit-files-to-ce-cases.md`,
+`users/person-tools/users.md` (folded into the `person` overview), and
+`users/properties/alertevents.md` → `users/subsystems/property/property-alerts-setup.md`.
+All legacy source files and now-empty legacy directories (`users/permitting/`,
+`users/person-tools/`, `users/properties/`, `users/code/`, `admin/user/`) were deleted.
+Inbound links in `users/index.md` and `admin/index.md` updated to the new paths (§11.4's
+repo-wide grep for stale old paths came back clean afterward). ⚠ flags a naming or content
+issue resolved *during* that file's migration:
 
-| Legacy file | Subsystem | New path |
-|---|---|---|
-| `users/cecases.html` | `cecase` (#10) | `users/subsystems/cecase/overview.md` (merge with existing stub; folds in alongside `caseload_manager.md`, `finetracking.md` per the §9 cecase pilot) |
-| `users/basics/user-login.html` | *(basics, no subsystem)* | `users/basics/user-login.md` |
-| `users/basics/dashboard-overview.html` | *(basics)* | `users/basics/dashboard-overview.md` |
-| `users/basics/printing.html` | *(basics)* | `users/basics/printing.md` |
-| `admin/user.html` | `accounts` (#1) | `admin/subsystems/accounts/overview.md` (merge with stub) |
-| `admin/user/umaps.html` | `accounts` (#1) | `admin/subsystems/accounts/umaps.md` |
-| `users/permitting/creating-permit-files.html` | `permitting` (#8) | `users/subsystems/permitting/creating-permit-files.md` |
-| `users/person-tools/person-search.html` | `person` (#5) | `users/subsystems/person/person-search.md` |
-| `users/person-tools/persons-to-properties.html` | `person` (#5) | `users/subsystems/person/persons-to-properties.md` — ⚠ review overlap with the row below (D3) |
-| `users/person-tools/updating-person-property-links.html` | `person` (#5) | `users/subsystems/person/updating-person-property-links.md` |
-| `users/properties/session-property.html` | `property` (#4) | `users/subsystems/property/session-property.md` (cross-link X1 `session`) |
-| `users/properties/parcelinfo.html` | `property` (#4) | `users/subsystems/property/parcel-info.md` |
-| `users/properties/users.html` *(titled "Property Search")* | `property` (#4) | `users/subsystems/property/property-search.md` — ⚠ filename doesn't match title, rename on migration |
-| `users/properties/creating-a-property-linking-mailing-address.html` | `property` (#4) | `users/subsystems/property/creating-a-property-linking-mailing-address.md` |
-| `users/properties/groups.html` | `property` (#4) | `users/subsystems/property/property-groups.md` |
-| `users/properties/new-page.html` *(titled "Add a Property Alert")* | `property` (#4) | `users/subsystems/property/add-a-property-alert.md` — ⚠ leftover default filename, rename on migration |
-| `users/properties/reporting.html` | `property` (#4) | `users/subsystems/property/property-reporting.md` (cross-link `reporting` #14) |
-| `users/properties/unit-configuration.html` | `property` (#4) | `users/subsystems/property/unit-configuration.md` |
-| `users/properties/connecting-people-to-properties.html` | `property` (#4) | `users/subsystems/property/connecting-people-to-properties.md` — ⚠ review overlap with `persons-to-properties.html` above (D3) |
-| `users/properties/add-an-event.html` | `property` (#4) | `users/subsystems/property/add-an-event.md` (cross-link `event` #6) |
-| `users/code/textblocks.md` *(already markdown, not `.html`, but not yet moved)* | `codebook` (#3) | `users/subsystems/codebook/textblocks.md` |
+| Legacy file | Subsystem | New path | Status |
+|---|---|---|---|
+| `users/cecases.html` | `cecase` (#10) | `users/subsystems/cecase/overview.md` (merge with existing stub; folds in alongside `caseload_manager.md`, `finetracking.md` per the §9 cecase pilot) | ✅ done |
+| `users/basics/user-login.html` | *(basics, no subsystem)* | `users/basics/user-login.md` | ✅ done |
+| `users/basics/dashboard-overview.html` | *(basics)* | `users/basics/dashboard-overview.md` | ✅ done |
+| `users/basics/printing.html` | *(basics)* | `users/basics/printing.md` | ✅ done |
+| `admin/user.html` | `accounts` (#1) | `admin/subsystems/accounts/overview.md` (merge with stub) | ✅ done |
+| `admin/user/umaps.html` | `accounts` (#1) | `admin/subsystems/accounts/umaps.md` | ✅ done |
+| `users/permitting/creating-permit-files.html` | `permitting` (#8) | `users/subsystems/permitting/creating-permit-files.md` | ✅ done |
+| `users/person-tools/person-search.html` | `person` (#5) | `users/subsystems/person/person-search.md` | ✅ done |
+| `users/person-tools/persons-to-properties.html` | `person` (#5) | `users/subsystems/person/connecting-people-to-properties.md` — ⚠ D3 resolved: byte-for-byte identical to the row below, merged into one canonical file under `person`, cross-linked from `property`'s overview | ✅ done |
+| `users/person-tools/updating-person-property-links.html` | `person` (#5) | `users/subsystems/person/updating-person-property-links.md` | ✅ done |
+| `users/properties/session-property.html` | `property` (#4) | `users/subsystems/property/session-property.md` (cross-link X1 `session`) | ✅ done |
+| `users/properties/parcelinfo.html` | `property` (#4) | `users/subsystems/property/parcel-info.md` | ✅ done |
+| `users/properties/users.html` *(titled "Property Search")* | `property` (#4) | `users/subsystems/property/property-search.md` — ⚠ renamed on migration per D2 | ✅ done |
+| `users/properties/creating-a-property-linking-mailing-address.html` | `property` (#4) | `users/subsystems/property/creating-a-property-linking-mailing-address.md` | ✅ done |
+| `users/properties/groups.html` | `property` (#4) | `users/subsystems/property/property-groups.md` | ✅ done |
+| `users/properties/new-page.html` *(titled "Add a Property Alert")* | `property` (#4) | `users/subsystems/property/add-a-property-alert.md` — ⚠ renamed on migration per D2 | ✅ done |
+| `users/properties/reporting.html` | `property` (#4) | `users/subsystems/property/property-reporting.md` (cross-link `reporting` #14) | ✅ done |
+| `users/properties/unit-configuration.html` | `property` (#4) | `users/subsystems/property/unit-configuration.md` | ✅ done |
+| `users/properties/connecting-people-to-properties.html` | `property` (#4) | *(deleted — D3 resolved as a dedup, not a second page; see the `person`-side row above)* | ✅ done |
+| `users/properties/add-an-event.html` | `property` (#4) | `users/subsystems/property/add-an-event.md` (cross-link `event` #6) | ✅ done |
+| `users/code/textblocks.md` *(already markdown, not `.html`, but not yet moved)* | `codebook` (#3) | `users/subsystems/codebook/textblocks.md` | ✅ done |
 
 (`admin.html`, `home.html` are handled in §11.2 above as branch-root landing pages, not
 subsystem pages.)
 
-- [ ] Convert each CKEditor/Scribe page's frontmatter to the standard convention (§ frontmatter
+- [x] Convert each CKEditor/Scribe page's frontmatter to the standard convention (§ frontmatter
       block already in use elsewhere) and `editor: markdown`.
-- [ ] Many Scribe-generated pages (`users/properties/*.html`) embed screenshots hosted on
-      `colony-recorder.s3.amazonaws.com` (a third-party service), not local files — see open
-      decision D4 before deciding whether to download and rehost each image under the page's
-      new `img/` folder, or leave the external links as-is for now.
-- [ ] One file per commit (or one subsystem's batch per commit) is strongly preferred over one
+- [x] Many Scribe-generated pages (`users/properties/*.html`) embed screenshots hosted on
+      `colony-recorder.s3.amazonaws.com` (a third-party service), not local files — **D4
+      resolved: left as external links, not rehosted.** Only repo-local images (root-level
+      PNGs referenced by these pages, e.g. `property_page_diagram_2025.png`, the `tb*.png`
+      textblock screenshots) were moved into the new per-subsystem `img/` folders.
+- [x] One file per commit (or one subsystem's batch per commit) is strongly preferred over one
       giant migration commit — easier to review and to revert a single page if something's off.
 
 ### 11.4 Phase 3 — Link rewriting mechanics
 
-- [ ] After each page moves, grep the **whole repo** for its old path (both the `.html` path
+**DONE 2026-08-14** for everything touched by the §11.3 batch (the 22-file migration + the
+extra real-content files folded in alongside them). Not yet exercised against §11.5/§11.6 since
+neither has landed real pages yet.
+
+- [x] After each page moves, grep the **whole repo** for its old path (both the `.html` path
       and, for images, the old absolute `/rootfolder/file.png` form) before deleting the old
       file — catches inbound links from pages that aren't moving in the same commit.
-- [ ] Absolute Wiki.js image paths (`/cecases/actiondate.png`) become relative (`img/file.png`)
+- [x] Absolute Wiki.js image paths (`/cecases/actiondate.png`) become relative (`img/file.png`)
       per §8a — this is the bulk of the rewriting work, since nearly every legacy page uses
       absolute paths.
-- [ ] Internal page-to-page links (e.g. `home.html`'s `<a href="/users/properties">`) get
+- [x] Internal page-to-page links (e.g. `home.html`'s `<a href="/users/properties">`) get
       rewritten to the new subsystem path once the target has moved — do this link-by-link as
-      each target subsystem is migrated, not as a guess-ahead pass.
-- [ ] Run a repo-wide link-check pass (per §8's existing recommendation — simple grep-based
-      script, no hosted service needed) once Phase 2 is complete, to catch anything missed.
+      each target subsystem is migrated, not as a guess-ahead pass. Fixed in `users/index.md`
+      (all four "By subsystem" links) and `admin/index.md` (`/admin/user` → the new accounts
+      overview path).
+- [x] Run a repo-wide link-check pass (per §8's existing recommendation — simple grep-based
+      script, no hosted service needed) once Phase 2 is complete, to catch anything missed —
+      ran a repo-wide grep for every deleted old path plus every old absolute image path;
+      came back clean except the one `admin/index.md` reference, which was fixed.
 
 ### 11.5 Phase 4 — Static-link redirect system (nginx + `helpmap/`)
 
@@ -806,16 +840,308 @@ for Phases 2/3/5 to finish.
 
 1. **Promote `letters` ahead of `cecase` as the fast-tracked launch subsystem** (©11.0),
    running in parallel with — not replacing — the `cecase` full-pattern pilot from §9 decision
-   5. Confirm?
+   5. Confirm? — ✅ **Resolved 2026-08-07**, executed as §11.1.
 2. **Rename two misnamed legacy files** during migration (`new-page.html` →
    `add-a-property-alert.md`, `users.html` → `property-search.md`) — confirm no external
    inbound links (bookmarks, JSF help links, Scribe share links) depend on the old filenames.
+   — ✅ **Resolved 2026-08-14**: both renamed as planned; no in-app JSF help links exist yet
+   (help-link wiring is still gated on §11.5), so there was nothing to break.
 3. **Dedup review**: `persons-to-properties.html` vs. `connecting-people-to-properties.html` —
-   merge into one page, or keep both if they cover genuinely distinct scope?
+   merge into one page, or keep both if they cover genuinely distinct scope? — ✅ **Resolved
+   2026-08-14**: the two Scribe exports were byte-for-byte identical. Merged into one canonical
+   file, `users/subsystems/person/connecting-people-to-properties.md`; the `property`-side
+   duplicate was deleted and replaced with a "see also" cross-link from the `property` overview.
 4. **Externally-hosted Scribe screenshots** (`colony-recorder.s3.amazonaws.com`) on the
    `users/properties/*.html` pages — download and rehost locally per page (recommended, avoids
-   depending on a third party's continued hosting) vs. leave as external links for now?
+   depending on a third party's continued hosting) vs. leave as external links for now? — ✅
+   **Resolved 2026-08-14**: left as external links for this pass, to keep the migration scoped
+   to reorganizing existing content rather than also taking on image-hosting risk/scope this
+   weekend. Revisit as a follow-up if any of these external links ever 404.
 5. **`letterAddresseeJumbledInFlow.png`** (orphaned root image) — review as possible source
-   material for the new Letters docs before archiving to `xarchive/`.
+   material for the new Letters docs before archiving to `xarchive/`. — ✅ **Resolved
+   2026-08-07** per §11.2: viewed, archived (contained placeholder text, unsuitable to publish).
 6. **nginx/VPS provisioning timeline** (§11.5) — when to schedule the hands-on infra session,
-   since it needs the user directly (SSH access, DNS, GitHub secrets).
+   since it needs the user directly (SSH access, DNS, GitHub secrets). — still open; the repo
+   owner is now working this personally via the `SL-1-nginx-tls-vps.md` runbook (separate
+   effort, not part of this legacy-cleanup pass).
+
+---
+
+# Part 12 — Meta-Organization Flow (taming the two-repo, N-subsystem beast)
+
+> **Appended 2026-08-12. Status: DRAFT / pending review — nothing here executed yet.**
+> Scope: the *governance layer above* the subsystem indexes and doc pages — how a solo
+> developer working with an AI that specs faster than one person can read keeps two repos,
+> ~23 subsystems, and four audiences from drifting into chaos.
+
+## 12.0 The actual problem (stated plainly)
+
+The bottleneck is no longer *writing* code or specs — the AI removes that constraint. The new
+bottleneck is **human situational awareness**: on any given day, work crosses subsystems
+(`letters` → `pdf compression` → `docs` → `callouts`) and crosses both repos (`codenforce`
+engineering, `boroughforge-wikidocs` docs), each with its own indexes, specs, and per-phase
+triggers. Without a governance layer, the solo dev loses the thread of *what was touched, on
+which branch, in which subsystem, and whether the docs still match the code*.
+
+The fix is three small, boring, **single-source-of-truth** artifacts ("organs") plus one
+correlation policy. None of them is a tool to build — they are markdown files and habits. That
+is deliberate: at a one-person scale, tooling/CI is premature (this repo already decided the
+same in §8's "review habit, not tooling — for now"). The organs are designed so that *the AI
+maintains them as a side effect of every turn* (see the codenforce
+`.github/copilot-instructions.md` "Progress Tracking (every turn)" rule this plan extends).
+
+## 12.1 What small teams / solo devs actually do (grounding in practice)
+
+The industry patterns that scale *down* to one person, and which of them this plan adopts:
+
+| Practice | What it is | Adopted here as |
+|---|---|---|
+| **Engineering daybook / devlog** | A reverse-chronological running log of what you did and why | **Organ 1 — the Worklog** (§12.2) |
+| **Single source of truth (SSOT) registry** | Every fact lives in exactly one place; everything else links to it | The existing `subsystem-registry.md` becomes the **join key** between repos (§12.4) |
+| **Status dashboard / "now-next-later"** | One board showing every workstream's state at a glance | **Organ 2 — the Subsystem Status dashboard** (§12.3) |
+| **Docs-as-code + "docs in Definition of Done"** | Docs live in git and a feature isn't "done" until its docs are updated | **Organ 3 — the correlation policy** (§12.4) + the DoD checklist (§12.6) |
+| **Diátaxis** (tutorial/how-to/reference/explanation) | A taxonomy of doc *types* | Already adopted in §5 |
+| **ADRs** (architecture decision records) | Dated design decisions with options + verdict | Already the format of this very file and the `*-architecture.md` pages |
+| **Trunk-based dev + short-lived, task-named branches** | Small branches named after the work item, merged fast | Branch-naming convention tied to subsystem slug + item ID (§12.2) |
+| **Conventional Commits + Keep-a-Changelog** | Structured commit/release messages that double as a log | Feeds the worklog and `system/releases/` |
+
+The meta-lesson from all of them: **do not duplicate state.** Each fact (a subsystem's
+canonical name, a feature's status, a page's published-ness) gets exactly one home; every other
+surface *links* to it. The three organs below each own one slice of state and link to the rest.
+
+## 12.2 Organ 1 — The Worklog (reverse-chronological devlog)
+
+**Purpose.** A single, personal, reverse-chrono ledger of core work steps that answers, at the
+end of a scattered day: *what did I touch, in what subsystem, on which branch, and where's the
+index/spec for it?* It is the developer's flow-of-consciousness spine — the one place that is
+allowed to cross every subsystem and both repos in a single entry.
+
+**Home.** `codenforce/docs/worklog.md` (the engineering home base, where the dense subsystem
+indexes and git branches live). It logs work in **both** repos; docs-side work is tagged
+`[wikidocs]`. It is an **editor-time dev artifact, never published** to Wiki.js — so it may use
+workspace-relative cross-repo links freely (both repos are always checked out as workspace
+siblings).
+
+**Shape.** One `##` heading per day, newest at top. Under each day: a one-line theme, then
+bullets **grouped by subsystem slug**, each bullet naming its git branch and linking to the
+governing index/spec/impl page. Keep entries terse — this is a ledger, not prose.
+
+```markdown
+# CodeNForce Worklog
+Reverse-chronological. Group by subsystem slug (see subsystem-registry). Note the branch on
+every line. Tag docs-repo work [wikidocs]. This file is never published.
+
+## 2026-08-12 — callouts spec, static-link plan, docs meta-flow
+- **letters** `feat/letters-III-H-compression` — shipped III.H image compression (high tier,
+  parallelized, on-doc disclosure note). → [letters-index-pt3 §III.H](subsystems/letters+emailing/letters-index-pt3.md)
+- **system-general-xsub** `feat/xsub-FC-callouts` — authored callout subsystem plan; wired
+  wiki.js help-link integration (§5a). → [xsubsystem-feature-index FC.*](subsystems/system-general-xsubsystem/xsubsystem-feature-index.md)
+- **system-general-xsub** `feat/xsub-SL-staticlink` — planned static-link facility items SL.1–SL.5.
+  → [xsubsystem-feature-index SL.*](subsystems/system-general-xsubsystem/xsubsystem-feature-index.md)
+- **[wikidocs] docs-site** `docs/meta-flow` — appended §12 meta-organization flow.
+  → [docs-overhaul-aug26 §12](../../boroughforge-wikidocs/dev/architecture/docs-overhaul-aug26.md)
+
+## 2026-08-07 — docs overhaul night
+- **[wikidocs] docs-site** `docs/overhaul-structure` — 23 hub pages + 77 stubs; letters fast-path.
+  → [docs-overhaul-aug26 §11.1](../../boroughforge-wikidocs/dev/architecture/docs-overhaul-aug26.md)
+```
+
+**Git-branching convention** (the worklog's second job is being the branch ledger a solo dev
+context-switching across subsystems needs):
+
+- One short-lived branch per subsystem work-thread, named `<type>/<slug>-<itemID>-<kebab>`:
+  - `type` ∈ `feat | fix | docs | chore | refactor` (Conventional-Commits vocabulary).
+  - `slug` = the registry slug (`letters`, `cecase`, `xsub` for `system-general-xsubsystem`).
+  - `itemID` = the index's stable item id where one exists (`III-H`, `FC-0`, `SL-2`).
+- The worklog records which branch each thread lived on, so "where did I leave the callout
+  work?" is answerable without `git branch | grep`.
+- Commits reference the item id in the subject (`feat(letters): III.H parallelize compression`)
+  so `git log --oneline | grep III.H` reconstructs a single item's history across days.
+- Merge/delete the branch when its index item reaches `DONE`; the worklog line is the durable
+  record after the branch is gone.
+
+## 12.3 Organ 2 — The Subsystem Status Dashboard (meta-index)
+
+**Purpose.** A one-screen board that mirrors the canonical subsystem registry and answers, per
+subsystem: *when did I last work it, what's its current state, and where are its dev index and
+its docs?* This is the "I jumped off `letters` a week ago — what shape did I leave it in and
+where's the index?" view.
+
+**Home.** `codenforce/docs/subsystem-status.md` (editor-time dev artifact, not published). It
+lives on the code side because it links primarily to the dense dev indexes and changes
+constantly; the *canonical naming/numbering* it mirrors stays in the wikidocs
+`system/subsystem-registry.md` (SSOT — the dashboard never redefines slugs, only references
+them). It links to the wikidocs docs hubs via workspace-relative paths (editor-only).
+
+**Shape.** One row per registry subsystem, in registry order. Volatile columns (date, status)
+are the whole point; stable columns (slug, dirs) are copied from the registry once.
+
+| # | Subsystem | Last worked | Active state | Dev index (codenforce) | Docs (wikidocs) |
+|---|---|---|---|---|---|
+| 12 | `letters` | 2026-08-12 | Pt III: III.G IN-PROGRESS, rest DONE | [letters-index-pt3](subsystems/letters+emailing/letters-index-pt3.md) | published (users+admin) |
+| — | `system-general-xsub` | 2026-08-12 | SL.* + FC.* all PLANNING | [xsubsystem-feature-index](subsystems/system-general-xsubsystem/xsubsystem-feature-index.md) | n/a (dev-only) |
+| 10 | `cecase` | 2026-08-05 | pilot migration pending | [vii_cecase/](subsystems/vii_cecase/) | stub (users) |
+| 4 | `property` | 2026-07-28 | — | [iii_property/](subsystems/iii_property/) | stub (users) |
+| … | … | … | … | … | … |
+
+- **Last worked** is bumped by whoever (usually the AI, per the every-turn rule) touches that
+  subsystem — it is the cheap signal that makes staleness visible at a glance.
+- **Active state** is a one-phrase summary; the linked dev index remains the authority for
+  per-item detail. Do not restate every item here (no duplicate state).
+- **Docs** column encodes the correlation at a glance: `n/a` (dev-only subsystem), `stub`
+  (`published:false`), or `published (branches)`. This is the seam Organ 3 governs.
+
+## 12.4 Organ 3 — The Dev↔Docs correlation policy (the gating line)
+
+The registry is the **join key**: its `slug` ↔ `codenforce dir` ↔ wikidocs `<branch>/subsystems/<slug>/`
+mapping (already the §2 "Source dir in codenforce" column) is what lets the two repos refer to
+the same subsystem unambiguously. The policy layered on top:
+
+**The line: only *implemented* features get *published* wikidocs pages.** A feature that is
+`PLANNING`/`LOCKED`/`IN-PROGRESS` in its codenforce dev index has **no published** user/admin
+page — at most a `published:false` stub (§8b). The dev index is the sole home of not-yet-shipped
+state; the public doc site never advertises vaporware as if it exists.
+
+**The one allowed exception: planned-feature *references*.** A user-facing page for an existing
+feature may *mention* a planned one inline, clearly marked, never as its own page:
+
+```markdown
+> 📅 **Planned — Fall 2026.** Linking a CE case directly to a permit file is on the roadmap;
+> today, use the property record as the bridge. (Tracked: cecase index item VII-x.)
+```
+
+Tag such a page `status:has-planned-ref` so these forward-looking notes can be swept and
+updated the moment the feature ships (grep the tag; remove/replace each callout). This is the
+same idea as the FC callout subsystem's `helplinkid` staying dormant until its doc is published
+(see `system-general-xsubsystem/dismissable-feature-callouts.md` §5a) — forward references are
+allowed to exist *unresolved* as long as they are *marked* so they can be found and closed.
+
+**The trigger table** — what fires when a feature crosses a lifecycle boundary:
+
+| Dev-index status change | Docs-side action | Worklog / dashboard |
+|---|---|---|
+| → `IN-PROGRESS` | none (or keep stub `published:false`); may add a `📅 Planned` ref on a related published page | worklog line; bump dashboard *Last worked* |
+| → `DONE` (feature ships) | **Definition of Done fires** (§12.6): write/flip the wikidocs page to `published:true`, register a `/help/` stable id, remove any now-obsolete `📅 Planned` ref | worklog line; dashboard *Docs* → `published` |
+| user-visible rename (e.g. Letters→Correspondence) | update the published page + `helpmap/_redirects` label | worklog line |
+
+## 12.5 Taming the codenforce repo: subsystem-slug alignment
+
+The docs repo already migrated to arabic-numeral **slugs** (`accounts`, `cecase`, `letters`,
+…); the codenforce `docs/subsystems/` tree is still Roman-numeral + ad-hoc
+(`vii_cecase`, `letters+emailing`, `system-general-xsubsystem`). The registry's crosswalk
+already maps the two, so alignment is a **convenience/consistency** task, not a blocker — and it
+must be **incremental**, because many inbound links (this file, `copilot-instructions.md`, the
+memory files, cross-index links) reference the current dir names.
+
+**Crosswalk (authoritative copy lives in `system/subsystem-registry.md` §"Source dir"):**
+
+| codenforce dir (today) | registry slug | codenforce dir (target) |
+|---|---|---|
+| `n_user` | `accounts` | `accounts` |
+| `i_municipality` | `municipality` | `municipality` |
+| `ii_codebook` | `codebook` | `codebook` |
+| `iii_property` | `property` | `property` |
+| `iv_person` | `person` | `person` |
+| `v_event` | `event` | `event` |
+| `vi_occperiod` | `occupancy` | `occupancy` |
+| `vii_cecase` | `cecase` | `cecase` |
+| `viii_ceactionreq` | `cear` | `cear` |
+| `letters+emailing` | `letters` | `letters` |
+| `x_payment` | `payment` | `payment` |
+| `xi_report` | `reporting` | `reporting` |
+| `xii_blob` | `files` | `files` |
+| `xiii_publicinfo` | `public-info` | `public-info` |
+| `xiv_spatial` | `mapping` | `mapping` |
+| `viv_occapp_publicforms` | `permit-applications` | `permit-applications` |
+| `permitting` | `permitting` | `permitting` (already aligned) |
+| `inspections` | `inspections` | `inspections` (already aligned) |
+| `data_exchange` | `data-exchange` | `data-exchange` |
+| `evaluations` | `evaluations` | `evaluations` (already aligned) |
+| `workflows` | `workflow-builder` | `workflow-builder` |
+| `system` | *(infra)* | `system` (keep — not a subsystem) |
+| `system-general-xsubsystem` | *(cross-cutting)* | `system-general-xsubsystem` (keep — not a subsystem) |
+
+**Alignment approach (deliberately not a big-bang rename):**
+
+1. **Freeze the naming going forward.** Any *new* subsystem doc dir in codenforce uses the
+   registry slug from day one. New subsystems get a registry row first (same gate as the docs
+   repo, §2).
+2. **Rename opportunistically, per subsystem, when it's already being worked** — the same
+   "migrate the thing you're touching anyway" discipline the docs repo uses for the `cecase`
+   pilot. A rename commit does `git mv` (preserve history) **and** updates every inbound link in
+   the same commit (grep the old dir name repo-wide first).
+3. **Update the two authoritative link surfaces** as each rename lands: the codenforce
+   `.github/copilot-instructions.md` subsystem list (currently only 11 Roman names — replace with
+   a pointer to the registry + the slug set) and any memory files that hardcode the old path.
+4. **Never rename `system/` or `system-general-xsubsystem/`** — they are infra/cross-cutting,
+   not registry subsystems (consistent with §2's two excluded rows).
+
+## 12.6 The loop — how the organs are used (daily / per-feature / weekly)
+
+- **Every turn / every work step (already the rule):** append or extend the current day's
+  **worklog** entry; bump the touched subsystem's **dashboard** *Last worked* date. This is
+  cheap and keeps both organs live instead of stale.
+- **Per feature reaching `DONE` — Definition of Done checklist** (the correlation trigger):
+  1. Dev index item → `DONE`, impl file linked.
+  2. wikidocs page written + `published:true` (or explicitly deferred with a dated worklog note).
+  3. `/help/` stable id registered in `helpmap/_redirects` if the feature has an in-app help link.
+  4. Any `📅 Planned` reference to this feature removed/replaced (grep `status:has-planned-ref`).
+  5. Dashboard *Docs* column updated; worklog line written.
+- **Weekly self-review (10 minutes):** scan the **dashboard** for subsystems whose *Last worked*
+  is stale while their dev index still shows `IN-PROGRESS` items (dangling work), and for `DONE`
+  dev items whose *Docs* column isn't `published` yet (doc debt). Reconcile drift; this is the
+  solo-dev substitute for a standup.
+
+## 12.7 Concrete tasks
+
+- [x] **T1 — Create `codenforce/docs/worklog.md`** (Organ 1) — DONE 2026-08-12. Header + branch
+      convention + seeded 2026-08-07 and 2026-08-12 entries.
+- [x] **T2 — Create `codenforce/docs/subsystem-status.md`** (Organ 2) — DONE 2026-08-12. Mirrors the
+      registry (core / workflow / supporting / public / integration / X-series), seeded with
+      `letters`, `cecase`, `property`, `xsub`/`ui-mobile`, `db`; `—` placeholders for the rest.
+- [x] **T3 — Add the correlation policy (Organ 3) to `codenforce/.github/copilot-instructions.md`**
+      — DONE 2026-08-12. Added a "Meta-Organization" section: worklog + dashboard every-turn rules,
+      the implemented-only-gets-published line, the `📅 Planned` marked-reference exception, the
+      Definition-of-Done checklist, and the incremental subsystem-dir rename rule.
+- [ ] **T4 — Extend `subsystem-registry.md`** so its "Source dir in codenforce" column is the
+      authoritative crosswalk (§12.5 table) and add a one-line note that codenforce dirs migrate
+      to slugs incrementally.
+- [ ] **T5 — Adopt the `status:planned` / `status:has-planned-ref` tags** in the §6 tagging
+      contract so forward-references are greppable.
+- [ ] **T6 — Add a "Meta-organization" row set to `docbacklog.md`** pointing here, so the three
+      organs are tracked like any other doc-governance work.
+- [ ] **T7 (incremental, non-blocking) — codenforce subsystem-dir slug rename**, one subsystem
+      per active-work pass per §12.5, starting with whichever is next actively worked (likely
+      `letters` or `cecase`). Not a standalone sweep.
+
+## 12.8 Where each organ lives (and why the split)
+
+| Artifact | Repo / path | Published? | Owns (SSOT for) |
+|---|---|---|---|
+| Subsystem **registry** | wikidocs `system/subsystem-registry.md` | yes (dev-tagged) | canonical slug ↔ number ↔ codenforce-dir crosswalk |
+| **Worklog** (Organ 1) | codenforce `docs/worklog.md` | no (editor-only) | reverse-chrono work steps + branch ledger |
+| **Status dashboard** (Organ 2) | codenforce `docs/subsystem-status.md` | no (editor-only) | per-subsystem last-worked + state + index links |
+| **Correlation policy** (Organ 3) | codenforce `.github/copilot-instructions.md` + this §12 | no | the implemented→published gating rule + DoD |
+| Per-subsystem **dev index** | codenforce `docs/subsystems/<dir>/*-index.md` | no | per-item status/spec/impl for that subsystem |
+| Per-subsystem **docs pages** | wikidocs `<branch>/subsystems/<slug>/` | yes when real | end-user/admin/dev/public content |
+
+The guiding rule behind the split: **volatile, cross-repo, editor-only tracking state lives in
+the codenforce home base** (worklog, dashboard) where the dense indexes and branches are and
+where cross-repo relative links are harmless; **canonical naming and all published content live
+in wikidocs**; and **each fact has exactly one owner** — everything else links. That single
+principle (SSOT + link, never duplicate) is what keeps the beast tame as the subsystem count and
+the AI's output rate both keep climbing.
+
+## 12.9 Open decisions for review
+
+1. **Organ homes** — confirm worklog + dashboard live in **codenforce** (`docs/`) as
+   editor-only artifacts, rather than in wikidocs `system/` (which would publish them and break
+   the cross-repo links). Recommended: codenforce.
+2. **Worklog granularity** — one entry per *day* (recommended, matches how the mind
+   reconstructs a day) vs. per *session* vs. per *branch*. Confirm daily.
+3. **Branch convention** — confirm `<type>/<slug>-<itemID>-<kebab>` and the `xsub` short-slug for
+   `system-general-xsubsystem`.
+4. **codenforce dir rename** — confirm incremental/opportunistic (§12.5) rather than a one-shot
+   mass `git mv` (which would touch every inbound link at once and is higher-risk).
+5. **Who bumps the dashboard** — rely on the AI's every-turn rule to keep *Last worked* current,
+   with the weekly self-review as the human backstop? Recommended: yes.

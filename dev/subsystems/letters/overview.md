@@ -27,6 +27,17 @@ substitution), `LetterTemplate`/`LetterCodeViolation`/`LetterDistributionEntry` 
   openhtmltopdf-pdfbox at finalization time, inlining photos as base64 data URIs. See the
   [PDF & document encoding primer](/dev/subsystems/letters/pdf-encoding-primer) for the
   libraries involved, PDF format internals, and styling/encoding gotchas.
+- **PDF image compression (III.H, 2026-08-12)** — `letter_buildPdfReadyHtml()`/
+  `buildHeaderImageHtml()` recompress embedded JPEGs (downscale + requantize) for the generated
+  PDF only, so attachment size stays under Resend/inbox limits; the stored blob originals and
+  the frozen `renderedHtml` used by the browser preview/emailed HTML body are never touched.
+  Per-photo recompression is fanned out across a bounded thread pool (sized to available CPU
+  cores) since each photo compresses independently; any letter whose PDF actually had photos
+  compressed gets a small auto-appended disclosure note stating how many and at what settings.
+  System-wide settings (enabled flag, long-edge px cap, JPEG quality) live in
+  `dbFixedValueLookup.properties`. See the
+  [PDF image compression primer](/dev/subsystems/letters/image-compression-primer) for the
+  implementation details, the parallelization rationale, and a JPEG/resolution deep-dive.
 - **Email** — `letter_distributeByEmail()` sends via Resend, with inbound delivery-status
   webhooks (`LetterEmailWebhookResource`) updating the distribution entry.
 - **Mail-merge tokens** — canonical registry is `LetterTokenType`; `LetterHtmlRenderer`

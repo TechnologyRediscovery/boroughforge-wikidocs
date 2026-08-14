@@ -21,10 +21,11 @@ Access step-by-step guides for all end users: code officers and municipal staff.
 
 ## By subsystem
 
-- [Properties](/users/properties)
-- [Persons](/users/person-tools)
-- [Code Enforcement Case Management](/users/cecases)
-- [Permitting](/users/permitting)
+- [Properties](/users/subsystems/property/overview)
+- [Persons](/users/subsystems/person/overview)
+- [Code Enforcement Case Management](/users/subsystems/cecase/overview)
+- [Permitting](/users/subsystems/permitting/overview)
+- [Codebook (Ordinances) — Text block manager](/users/subsystems/codebook/textblocks)
 - [Letters & Emailing](/users/subsystems/letters/overview) — generating, distributing
   (mail/email/posting/door-hanger), and printing letters; new as of August 2026, including
   the panel rename from "Letters" to **Correspondence**.
