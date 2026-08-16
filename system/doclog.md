@@ -12,6 +12,41 @@ dateCreated: 2026-07-21T21:20:00.000Z
 
 Reverse-chronological log of structural changes made to this doc repo (file moves, conversions, deletions). For product release notes, see [Release notes](/system/releases/releasenotes).
 
+## 2026-08-16
+
+- **Refactored [subsystem-registry.md](/system/subsystem-registry):** the four big
+  explanatory blocks that used to sit at the top of the page (Numbering, Branch convention,
+  X-series naming/graduation, Adding a new subsystem) were moved into a new **Conventions**
+  section below all the subsystem tables, so the page opens with tables instead of a wall of
+  prose. Every row across the Core/Occupancy/Supporting/Public-facing/Integration tables now
+  links its slug straight to that subsystem's hub page under `system/subsystems/` (the
+  X-series rows are left unlinked — their `dev/subsystems/<slug>/overview.md` stubs are still
+  `published: false`, so there's no live page to point at yet).
+- **Migrated the `documentation` (#24) row's notes out of the registry table** into this
+  changelog and a new hub page, [system/subsystems/documentation.md](/system/subsystems/documentation)
+  (the registry didn't have one before — it's the only numbered subsystem missing its hub
+  page until now). The full text that used to live in the registry's Notes cell, preserved
+  here for the record:
+
+  > The Wiki.js docs site itself (fully public, no login wall) plus the static-link redirect
+  > layer: in-app `/help/{id}` links (serving dev/admin/users audiences) and the QR-code
+  > `/report` redirect for citizens scanning vehicle decals. Placed under Public-facing
+  > subsystems rather than the X-series because real citizens hit it directly — unlike the
+  > X-series' "no code officer or muni admin ever browses to this by name" test. Numbered
+  > **#24** (the next available flat number) rather than backfilled to #23, which
+  > `import-export` already holds — this registry's numbering is append-only and existing
+  > rows are never renumbered. Home docs: `dev/architecture/` (this registry,
+  > `docs-overhaul-aug26`, `constitution.md`) and `dev/wiki.js/`
+  > (`static-link-redirect-architecture.md`, `wikijs-vps-reference.md`); the codenforce-side
+  > counterparts are the editor-only `docs/worklog.md` + `docs/subsystem-status.md` organs,
+  > plus a dedicated per-subsystem dev index at `docs/subsystems/documentation/`
+  > (`documentation-feature-index.md` + the `SL-1-nginx-tls-vps.md` runbook), split out of the
+  > former joint `system-general-xsubsystem/xsubsystem-feature-index.md` once this subsystem
+  > outgrew sharing a folder with the unrelated `FC`/`ui-mobile` callouts work. No dedicated
+  > wikidocs-side `documentation/` branch folder exists — it never outgrew `dev/architecture/`
+  > + `dev/wiki.js/`, so per the registry's own incremental-creation discipline none was
+  > created.
+
 ## 2026-08-07
 
 - Created [dev/architecture/docs-overhaul-aug26.md](/dev/architecture/docs-overhaul-aug26) \u2014
