@@ -819,11 +819,23 @@ drafted in-repo ahead of time:
 
 ### 11.6 Phase 5 — `cecase` full pilot (as already planned in §9/§10)
 
-Unchanged from §10's existing item, sequenced after Phase 0 pulls the letters-specific content
-and images out of `users/cecases/` first: fold the remaining `cecases/*.png`
+**DONE 2026-08-16.** Folded the remaining `cecases/*.png`
 (`actiondate.png`, `fineeventattached.png`, `finepaid.png`, `finepaidinlist.png`,
-`selectfineamounteventcat.png`) into `users/subsystems/cecase/img/`, and migrate
-`caseload_manager.md` / `finetracking.md` into `users/subsystems/cecase/`.
+`selectfineamounteventcat.png`) plus `users/cecases/img/*.png`
+(`caseExport.png`, `casesearch_overview.png`, `customcecasesearch.png`, `selected_caseses.png`)
+into `users/subsystems/cecase/img/`; migrated `caseload_manager.md` → `caseload-manager.md`
+and `finetracking.md` into `users/subsystems/cecase/`, rewriting `finetracking.md`'s absolute
+`/cecases/*.png` image references to relative `img/*.png`. Cross-linked both from
+`users/subsystems/cecase/overview.md`. Root `cecases/` and `users/cecases/` deleted.
+Same pass also folded the analogous `inspections` legacy content (not formally tracked as its
+own §11.x item, but identical shape): `inspections/{editspaceorder,reorderingtools,
+spacedetailsdialog}.png` → `users/subsystems/inspections/img/`, `users/inspections/
+spacetools.md` → `users/subsystems/inspections/spacetools.md` (image refs rewritten to
+relative `img/`), and `overview.md` flipped from stub to real, published content linking to
+it. Also deleted the stale `users/properties/creating-a-property-linking-mailing-address.html`
+(superseded duplicate of the already-migrated `.md`), and moved `users/workflows.md` →
+`users/subsystems/workflow-builder/overview.md` (replacing that branch's stub). See the
+worklog entry for 2026-08-16.
 
 ### 11.7 Sequencing
 

@@ -20,6 +20,7 @@ violations, and linked properties/persons.
 
 See also: [subsystem registry](/system/subsystem-registry), entry #10. This is the pilot
 subsystem for the branch/subsystem/hub migration pattern (see
-[docs-overhaul-aug26.md](/dev/architecture/docs-overhaul-aug26) §9–§10) — existing scattered
-content (`users/cecases/`, root `cecases/*.png`) is still queued for migration into this
-structure, not yet moved.
+[docs-overhaul-aug26.md](/dev/architecture/docs-overhaul-aug26) §9–§10) — the legacy scattered
+content (`users/cecases/`, root `cecases/*.png`) was folded into this structure 2026-08-16
+(§11.6): [caseload manager & case search](/users/subsystems/cecase/caseload-manager) and
+[tracking fines on CE cases](/users/subsystems/cecase/finetracking).

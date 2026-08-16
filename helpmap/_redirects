@@ -9,19 +9,27 @@
 # build/deploy runbook, and dev/wiki.js/static-link-redirect-architecture.md (this repo) for
 # the design doc these 21 stable IDs come from.
 
-# --- Original 12 (design-phase IDs, targets confirmed) ---
-cecase-events-add           /users/cecases/add-an-event
-cecase-cross-muni           /users/cecases/cross-municipality
-cecase-cears-internal       /users/cecases/cears-internal
-dashboard-case-priority     /users/cecases/case-priority-color-scheme
-dashboard-case-search       /users/cecases/case-search
-inspections-fins            /inspections/fins
-code-enter-ordinance        /dev/code/enter-ordinance
-code-add-to-codebook        /dev/code/add-to-codebook
-code-create-checklist       /dev/code/create-checklist
-property-persons-link       /users/properties/connecting-people-to-properties
-occ-permit-files            /users/permitting/permit-files
-occ-permit-generate         /users/permitting/generate-permit
+# --- Original 12 (design-phase IDs) ---
+# Verified against the real Wiki.js tree 2026-08-16 (see codenforce
+# docs/subsystems/documentation/SL-2-helplinks-cicd.md post-mortem) — only 2 of the original
+# 12 hardcoded targets turned out to be real; the other 10 were unverified guesses pointing
+# nowhere. Commented out below (falls back to homepage) until a real page exists to point at.
+# TODO cecase-events-add           (candidate page not yet confirmed)
+# TODO cecase-cross-muni           (candidate page not yet confirmed)
+# TODO cecase-cears-internal       (candidate page not yet confirmed)
+# TODO dashboard-case-priority     (candidate page not yet confirmed)
+# TODO dashboard-case-search       (candidate page not yet confirmed)
+inspections-fins             /users/subsystems/cecase/finetracking
+# confirmed 2026-08-16 — "fins" (fines) content lives under `cecase`, not `inspections`; the
+# legacy GitHub Pages path (inspections/fins.html) predates the current subsystem split.
+# TODO code-enter-ordinance        (candidate page not yet confirmed)
+# TODO code-add-to-codebook        (candidate page not yet confirmed)
+# TODO code-create-checklist       (candidate page not yet confirmed)
+# TODO property-persons-link       (likely duplicate of property-link-mailing-address or
+#      property-link-multiple-people below — needs human review before confirming either way)
+occ-permit-files             /users/subsystems/permitting/creating-permit-files
+# confirmed 2026-08-16
+# TODO occ-permit-generate         (candidate page not yet confirmed)
 
 # --- 9 newly discovered (SL.0 re-inventory) — targets not yet assigned/confirmed ---
 # Uncomment and fix the path once each wiki page is confirmed published (see SL-2 impl file
@@ -35,3 +43,113 @@ occ-permit-generate         /users/permitting/generate-permit
 # TODO property-link-mailing-address    /users/subsystems/property/creating-a-property-linking-mailing-address
 # TODO property-link-multiple-people    /users/subsystems/person/updating-person-property-links
 # TODO cecase-management-overview       (candidate page not yet confirmed)
+
+# --- Full users/ tree coverage (2026-08-16) ---
+# Every page that exists under users/ gets a stable ID here, even ones no XHTML help link
+# points at yet — so a future help-link author always has a ready ID instead of inventing one
+# ad hoc. Inventoried and cross-checked against this file mechanically, not guessed — see
+# helpmap/audit-users-coverage.sh (re-run it after adding/removing users/ pages; it also prints
+# the proposed ID for anything still missing, using the naming convention documented at the
+# top of that script). Live lines below point at real `published: true` pages. `# TODO` lines
+# are `published: false` stub pages — uncomment as-is (no path change needed) once written and
+# flipped to `published: true`. These are a separate, newer batch from the "original 12" /
+# "9 newly discovered" IDs above, which stay as they are (those are tied to actual/future
+# hardcoded help-link references in the codenforce XHTML, found by SL.0's codebase scan, and
+# follow their own older, more thematic naming rather than this batch's mechanical
+# `<subsystem>-<page-slug>` rule).
+
+# users/basics/
+basics-dashboard-overview                     /users/basics/dashboard-overview
+basics-hardware                               /users/basics/hardware
+basics-home                                   /users/basics/home
+basics-printing                               /users/basics/printing
+basics-user-login                             /users/basics/user-login
+users-home                                    /users/index
+
+# users/subsystems/accounts/
+# TODO accounts-overview                 /users/subsystems/accounts/overview   # stub — not yet published
+
+# users/subsystems/cear/
+# TODO cear-overview                     /users/subsystems/cear/overview   # stub — not yet published
+
+# users/subsystems/cecase/
+cecase-caseload-manager                       /users/subsystems/cecase/caseload-manager
+cecase-overview                               /users/subsystems/cecase/overview
+
+# users/subsystems/codebook/
+# TODO codebook-overview                 /users/subsystems/codebook/overview   # stub — not yet published
+codebook-textblocks                           /users/subsystems/codebook/textblocks
+
+# users/subsystems/communication/
+# TODO communication-overview            /users/subsystems/communication/overview   # stub — not yet published
+
+# users/subsystems/data-exchange/
+# TODO data-exchange-overview            /users/subsystems/data-exchange/overview   # stub — not yet published
+
+# users/subsystems/evaluations/
+# TODO evaluations-overview              /users/subsystems/evaluations/overview   # stub — not yet published
+
+# users/subsystems/event/
+# TODO event-overview                    /users/subsystems/event/overview   # stub — not yet published
+
+# users/subsystems/files/
+# TODO files-overview                    /users/subsystems/files/overview   # stub — not yet published
+
+# users/subsystems/import-export/
+# TODO import-export-overview            /users/subsystems/import-export/overview   # stub — not yet published
+
+# users/subsystems/inspections/
+inspections-overview                          /users/subsystems/inspections/overview
+inspections-spacetools                        /users/subsystems/inspections/spacetools
+
+# users/subsystems/letters/
+letters-distributing-a-letter                 /users/subsystems/letters/distributing-a-letter
+letters-generating-and-sending-a-letter       /users/subsystems/letters/generating-and-sending-a-letter
+letters-generic-officer-signatures            /users/subsystems/letters/generic-officer-signatures
+letters-overview                              /users/subsystems/letters/overview
+letters-printing-a-letter                     /users/subsystems/letters/printing-a-letter
+
+# users/subsystems/mapping/
+# TODO mapping-overview                  /users/subsystems/mapping/overview   # stub — not yet published
+
+# users/subsystems/municipality/
+# TODO municipality-overview             /users/subsystems/municipality/overview   # stub — not yet published
+
+# users/subsystems/occupancy/
+# TODO occupancy-overview                /users/subsystems/occupancy/overview   # stub — not yet published
+
+# users/subsystems/payment/
+# TODO payment-overview                  /users/subsystems/payment/overview   # stub — not yet published
+
+# users/subsystems/permitting/
+permitting-linking-permit-files-to-ce-cases   /users/subsystems/permitting/linking-permit-files-to-ce-cases
+permitting-managing-canned-cert-text          /users/subsystems/permitting/managing-canned-cert-text
+permitting-overview                           /users/subsystems/permitting/overview
+
+# users/subsystems/person/
+person-connecting-people-to-properties        /users/subsystems/person/connecting-people-to-properties
+person-overview                               /users/subsystems/person/overview
+person-search                                 /users/subsystems/person/person-search
+
+# users/subsystems/property/
+property-add-an-event                         /users/subsystems/property/add-an-event
+property-add-a-property-alert                 /users/subsystems/property/add-a-property-alert
+property-overview                             /users/subsystems/property/overview
+property-alerts-setup                         /users/subsystems/property/property-alerts-setup
+property-groups                               /users/subsystems/property/property-groups
+property-reporting                            /users/subsystems/property/property-reporting
+property-search                               /users/subsystems/property/property-search
+property-session-property                     /users/subsystems/property/session-property
+property-unit-configuration                   /users/subsystems/property/unit-configuration
+
+# users/subsystems/public-applications/
+# TODO public-applications-overview      /users/subsystems/public-applications/overview   # stub — not yet published
+
+# users/subsystems/reporting/
+# TODO reporting-overview                /users/subsystems/reporting/overview   # stub — not yet published
+
+# users/subsystems/search/
+# TODO search-overview                   /users/subsystems/search/overview   # stub — not yet published
+
+# users/subsystems/workflow-builder/
+workflow-builder-overview                     /users/subsystems/workflow-builder/overview

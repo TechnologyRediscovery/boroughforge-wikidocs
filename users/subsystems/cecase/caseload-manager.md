@@ -3,7 +3,7 @@ title: Caseload manager
 description: Dashboard case management
 published: true
 date: 2026-03-30T20:20:47.312Z
-tags: 
+tags: subsystem:cecase, audience:staff, type:task
 editor: markdown
 dateCreated: 2026-03-28T21:18:26.856Z
 ---

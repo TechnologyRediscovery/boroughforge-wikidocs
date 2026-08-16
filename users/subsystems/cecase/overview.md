@@ -30,5 +30,9 @@ letter viewing, finalizing, marking as sent, and event logging.
 Batch case operations can be initiated directly from the caseload manager. As of March 2026,
 only case closure is an available batch action.
 
+See the [caseload manager & case search](caseload-manager) page for the full batch-close
+workflow and the legacy tabular case search, and [tracking fines on CE cases](finetracking)
+for a suggested stopgap fine/fee workflow.
+
 See also: [subsystem hub](/system/subsystems/cecase).
 

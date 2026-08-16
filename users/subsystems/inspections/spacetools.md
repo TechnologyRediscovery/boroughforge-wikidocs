@@ -3,7 +3,7 @@ title: Managing inspected spaces
 description: Inspected space management tools afford lots of officer flexibility to document details of inspected areas of a property
 published: true
 date: 2026-05-11T12:46:47.753Z
-tags: 
+tags: subsystem:inspections, audience:staff, type:task
 editor: markdown
 dateCreated: 2026-05-11T12:33:25.643Z
 ---
@@ -31,7 +31,7 @@ At the bottom of the table, running totals are shown for the entire inspection: 
 
 Click **edit space details** in a space row to open the details dialog. This is not available once the inspection has a determination or has been dispatched.
 
-![spacedetailsdialog.png](/inspections/spacedetailsdialog.png)
+![spacedetailsdialog.png](img/spacedetailsdialog.png)
 
 #### Location panel
 
@@ -88,8 +88,8 @@ To reorder spaces manually:
 2. Use **to top**, **move up**, **move down**, and **to bottom** to reposition individual spaces. Each click saves the new order to the database immediately — there is no separate save step.
 3. Click **done ordering** when finished. The custom order is now the permanent display order for this inspection.
 
-![editspaceorder.png](/inspections/editspaceorder.png)
-![reorderingtools.png](/inspections/reorderingtools.png)
+![editspaceorder.png](img/editspaceorder.png)
+![reorderingtools.png](img/reorderingtools.png)
 
 #### Resetting to default
 

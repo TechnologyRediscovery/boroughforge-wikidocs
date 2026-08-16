@@ -228,3 +228,45 @@ Check whether ports 80 and 443 are bound:
 ```bash
 sudo ss -ltnp | grep -E ':80|:443'
 ```
+
+## Custom CSS: move the page sidebar (Contents / Tags / Last Edited By) to the right
+
+**Try this first, no CSS needed:** Wiki.js's default theme has a built-in **Table of Contents
+Position** setting — **Administration → Theme → Table of Contents Position → Right**. It moves
+the Contents/Tags/Last-Edited-By column (and the title-banner indent that lines up with it) as
+one unit, which is exactly this ask. Confirm the header title/description banner still lines up
+with the article body afterward; if it does, nothing below is needed.
+
+**If the toggle isn't available or doesn't fully do it**, paste this into
+**Administration → Theme → Custom CSS** (append — don't overwrite whatever is already
+there; see the "Custom Theme CSS...not git-backed" note in
+[SL-1-nginx-tls-vps.md](../../../codenforce/docs/subsystems/documentation/SL-1-nginx-tls-vps.md)
+Phase 0 — nothing here lives in git, so re-paste after any VPS/droplet migration):
+
+```css
+/* Move the page sidebar (Page Contents / Tags / Last Edited By) to the right of the
+   article body instead of the left. Reverse-engineered from the default theme's
+   client/themes/default/components/page.vue: .page-col-sd is the sidebar column,
+   .page-col-content is the article column, both children of the same flex row — swapping
+   their `order` swaps which side they render on. Only takes effect at the `lg` breakpoint
+   and up; below that the sidebar isn't rendered at all, so no media query is needed here. */
+.v-application .page-col-sd {
+  order: 2 !important;
+}
+.v-application .page-col-content {
+  order: 1 !important;
+}
+
+/* The title/description banner above the two columns is indented (offset-lg3/offset-xl2)
+   to line up under the sidebar's width when the sidebar is on the left. With the sidebar
+   moved to the right, that indent just leaves dead space on the left — drop it so the
+   title lines up flush with the article body underneath it. */
+.v-application .page-header-section .page-col-content {
+  margin-left: 0 !important;
+}
+```
+
+If the deployed Wiki.js version renders different class names than `.page-col-sd` /
+`.page-col-content` / `.page-header-section` (check via browser dev tools — right-click the
+sidebar → Inspect), update the selectors above to match; the `order`/`margin-left` approach
+itself still applies.

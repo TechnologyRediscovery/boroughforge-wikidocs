@@ -17,13 +17,13 @@ you are:
 
 ## Choose your guide
 
-- **[Users Guide](/users)** — for code officers and municipal staff running the system
+- **[Users Guide](/users/index)** — for code officers and municipal staff running the system
   day-to-day: properties, cases, permits, letters, and workflows.
-- **[Admin Guide](/admin)** — for municipal system administrators: user accounts, data entry,
+- **[Admin Guide](/admin/index)** — for municipal system administrators: user accounts, data entry,
   and municipality-level configuration.
-- **[Public Guide](/public)** — for members of the public submitting a code enforcement
+- **[Public Guide](/public/index)** — for members of the public submitting a code enforcement
   request or an application to a municipality — no login required.
-- **[Developer Guide](/dev)** — for developers and contributors working on CodeNforce itself:
+- **[Developer Guide](/dev/index)** — for developers and contributors working on CodeNforce itself:
   architecture, database, and JSF/Java notes.
 - **[Subsystem Registry](/system/subsystem-registry)** — the canonical cross-cutting
   reference list of every subsystem, with links into all four guides above.

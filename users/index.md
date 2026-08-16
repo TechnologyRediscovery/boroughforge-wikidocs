@@ -24,12 +24,13 @@ Access step-by-step guides for all end users: code officers and municipal staff.
 - [Properties](/users/subsystems/property/overview)
 - [Persons](/users/subsystems/person/overview)
 - [Code Enforcement Case Management](/users/subsystems/cecase/overview)
+- [Inspections](/users/subsystems/inspections/overview)
 - [Permitting](/users/subsystems/permitting/overview)
 - [Codebook (Ordinances) — Text block manager](/users/subsystems/codebook/textblocks)
 - [Letters & Emailing](/users/subsystems/letters/overview) — generating, distributing
   (mail/email/posting/door-hanger), and printing letters; new as of August 2026, including
   the panel rename from "Letters" to **Correspondence**.
-- [Workflows](/users/workflows)
+- [Workflow Builder](/users/subsystems/workflow-builder/overview)
 
 For the full subsystem list (most still stubs, filled in as each area is migrated), see the
 [subsystem registry](/system/subsystem-registry).
