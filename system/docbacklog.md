@@ -16,6 +16,10 @@ Forward-looking list of doc-repo work. For a log of what's already been done, se
 
 - Wire navigation links to `admin/westmc-data-exchange.md` from `admin.html` and `dev/data.md`.
 - Manually delete `system/releases/release_notes.xhtml` (superseded by `releasenotes.md` / `releasenotes-archive.md`).
+- **Write the 12 orphaned help-topic pages** left by the SL.4 static-link migration
+  (2026-08-16) — real content never existed for these, so their in-app help icons were removed
+  rather than left pointing at a permanent homepage fallback. Full topic-by-topic list, legacy
+  anchor context, and re-linking steps: [static-link-orphaned-topics.md](/system/static-link-orphaned-topics).
 
 ## Next big topics
 

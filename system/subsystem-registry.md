@@ -22,7 +22,7 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | # | Slug | Display name | Legacy ID | CNF source dir |
 |---|---|---|---|---|
 | 1 | [`accounts`](/system/subsystems/accounts) | User Accounts | `N_USER` | `n_user` |
-| 2 | [`municipality`](/system/subsystems/municipality) | Municipality Configuration | `I_MUNICIPALITY` | `i_municipality` |
+| 2 | [`municipality`](/system/subsystems/municipality) (muni) | Municipality Configuration | `I_MUNICIPALITY` | `i_municipality` |
 | 3 | [`codebook`](/system/subsystems/codebook) | Codebook (Ordinances) | `II_CODEBOOK` | `ii_codebook` |
 | 4 | [`property`](/system/subsystems/property) | Property | `III_PROPERTY` | `iii_property` |
 | 5 | [`person`](/system/subsystems/person) | Person | `IV_PERSON` | `iv_person` |
@@ -34,9 +34,9 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 |---|---|---|---|---|---|
 | 7 | [`occupancy`](/system/subsystems/occupancy) | Occupancy Periods | `VI_OCCPERIOD` | `vi_occperiod` | Occ periods = permit files in the UI; contain statuses, have a manager and type. |
 | 8 | [`permitting`](/system/subsystems/permitting) | Permitting | *(none)* | `permitting` | Distinct subsystem — permit files live on the occupancy side of CNF (as opposed to the code-enforcement/violation side), but permitting is significant and critical enough to stand on its own rather than being folded into `occupancy`. |
-| 9 | [`inspections`](/system/subsystems/inspections) | Inspections | *(none)* | `inspections` | Objects span both `occupancy` and `cecase` — inspections are not exclusive to either. Kept as its own subsystem rather than being split or nested under one parent. |
+| 9 | [`inspections`](/system/subsystems/inspections) (fins)| Inspections | *(none)* | `inspections` | Objects span both `occupancy` and `cecase` — inspections are not exclusive to either. Kept as its own subsystem rather than being split or nested under one parent. |
 | 10 | [`cecase`](/system/subsystems/cecase) | Code Enforcement Cases | `VII_CECASE` | `vii_cecase` | |
-| 11 | [`evaluations`](/system/subsystems/evaluations) | Evaluations | *(none)* | `evaluations` | |
+| 11 | [`evaluations`](/system/subsystems/evaluations) (evals)| Evaluations | *(none)* | `evaluations` | |
 
 ## Supporting subsystems
 
@@ -47,8 +47,8 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | 14 | [`reporting`](/system/subsystems/reporting) | Reporting | *(none)* | `xi_report` | |
 | 15 | [`files`](/system/subsystems/files) | File / Blob Storage | `XII_BLOB` | `xii_blob` | |
 | 16 | [`mapping`](/system/subsystems/mapping) | Spatial / GIS Mapping | *(none)* | `xiv_spatial` | |
-| 17 | [`communication`](/system/subsystems/communication) | Communication | *(none)* | *(none)* | Emailing infrastructure plus planned SMS support. Overlaps in name with `letters` (which owns letter *content/template authoring*) — `communication` is meant as the delivery/transport layer. Flag for a future pass on whether these two should merge once both have real content. |
-| 18 | [`workflow-builder`](/system/subsystems/workflow-builder) | Workflow Builder | *(none)* | `workflows` | The Workflow Builder *engine/feature* itself — do not confuse with cross-subsystem business-process guides, which live under each branch's `best-practices/` folder instead (see overhaul plan §5). |
+| 17 | [`communication`](/system/subsystems/communication) (comms)| Communication | *(none)* | *(none)* | Emailing infrastructure plus planned SMS support. Overlaps in name with `letters` (which owns letter *content/template authoring*) — `communication` is meant as the delivery/transport layer. Flag for a future pass on whether these two should merge once both have real content. |
+| 18 | [`workflow-builder`](/system/subsystems/workflow-builder) (workflow) | Workflow Builder | *(none)* | `workflows` | The Workflow Builder *engine/feature* itself — do not confuse with cross-subsystem business-process guides, which live under each branch's `best-practices/` folder instead (see overhaul plan §5). |
 | 19 | [`search`](/system/subsystems/search) | Search | *(none)* | *(none)* | Cross-subsystem search infrastructure (`SearchParams`, `QueryEnum`, per-entity search UI). Touches nearly every domain subsystem's data model. |
 
 ## Public-facing subsystems
@@ -56,15 +56,15 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | # | Slug | Display name | Legacy ID | CNF source dir | Notes |
 |---|---|---|---|---|---|
 | 20 | [`cear`](/system/subsystems/cear) | Code Enforcement Action Requests (CEAR) | `VIII_CEACTIONREQUEST` | `viii_ceactionreq` | Covers CEAR creation/review for logged-in users as well as the public submission portal and public status-lookup page. Absorbs the former separate `public-info` slug: CNF has no generalized public-info lookup beyond CEAR status, so a standalone "public info" subsystem was redundant. |
-| 21 | [`public-applications`](/system/subsystems/public-applications) | Public Applications | *(none)* | `viv_occapp_publicforms` | Renamed from `permit-applications`. Covers all public-facing application intake: rental registration applications, permit applications, inspection requests, and zoning applications. |
-| 24 | [`documentation`](/system/subsystems/documentation) | Documentation & Help Systems | *(none)* | *(spans repos)* | The Wiki.js docs site itself plus the static-link redirect layer (in-app `/help/{id}` links and the QR-code `/report` redirect). Numbered **#24** (append-only numbering — not backfilled to #23, which `import-export` already holds). See the [documentation subsystem hub](/system/subsystems/documentation) for design/ops docs and the [documentation change log](/system/doclog) for the full history of this row. |
+| 21 | [`public-applications`](/system/subsystems/public-applications) (pub)| Public Applications | *(none)* | `viv_occapp_publicforms` | Renamed from `permit-applications`. Covers all public-facing application intake: rental registration applications, permit applications, inspection requests, and zoning applications. |
+| 24 | [`documentation`](/system/subsystems/documentation) (docs)| Documentation & Help Systems | *(none)* | *(spans repos)* | The Wiki.js docs site itself plus the static-link redirect layer (in-app `/help/{id}` links and the QR-code `/report` redirect). Numbered **#24** (append-only numbering — not backfilled to #23, which `import-export` already holds). See the [documentation subsystem hub](/system/subsystems/documentation) for design/ops docs and the [documentation change log](/system/doclog) for the full history of this row. |
 
 ## Integration & platform
 
 | # | Slug | Display name | Legacy ID | CNF source dir | Notes |
 |---|---|---|---|---|---|
-| 22 | [`data-exchange`](/system/subsystems/data-exchange) | Data Exchange (WestMoreland County) | *(none)* | `data_exchange` | Tens of thousands of lines of integration code and complex admin config pages for reviewing, enabling, and monitoring regular data exchanges with Westmoreland County. One of the most admin-critical pathways in the system. |
-| 23 | [`import-export`](/system/subsystems/import-export) | Import / Export | *(none)* | *(none)* | General-purpose bulk data import/export tooling — distinct from `data-exchange`, which is the Westmoreland-County-specific integration pathway. |
+| 22 | [`data-exchange`](/system/subsystems/data-exchange) (dataex) | Data Exchange (WestMoreland County) | *(none)* | `data_exchange` | Tens of thousands of lines of integration code and complex admin config pages for reviewing, enabling, and monitoring regular data exchanges with Westmoreland County. One of the most admin-critical pathways in the system. |
+| 23 | [`import-export`](/system/subsystems/import-export) (io) | Import / Export | *(none)* | *(none)* | General-purpose bulk data import/export tooling — distinct from `data-exchange`, which is the Westmoreland-County-specific integration pathway. |
 
 ## X-series: dev-only infrastructure subsystems
 

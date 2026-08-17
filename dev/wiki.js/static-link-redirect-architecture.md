@@ -371,51 +371,51 @@ committing, and pushing. CI deploys in under 10 seconds. No Java, no Maven, no W
 
 ## JSF/XHTML Side: The `helpLinkCC` Composite Component
 
-All 56 existing link occurrences use an identical two-div structure — a material icon and a
-"help" text anchor side by side. Extract this into a Facelets composite component to enforce
-consistency and create a single change point for the docs base URL.
+**Updated 2026-08-16 (SL.3 build) — corrected against real code.** All 56 existing link
+occurrences use *some* variant of an icon + text pattern, but there's real legacy variance
+(different text, some icon-only, some outlined buttons — years of spotty doc linking). Rather
+than try to capture that variance, `helpLinkCC` collapses everything to one consistent,
+**icon-only** link: a single outlined "?" (Material Icons `help_outline`). This is the one
+deliberate exception to this codebase's "no icon-only links without visible text" rule — a
+help "?" is universally understood, and skipping the text avoids cluttering pages that may
+carry several of these.
 
 **Component location**: `src/main/webapp/resources/components/helpLinkCC.xhtml`
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:composite="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
 
-    <composite:interface>
-        <composite:attribute name="helpId" required="true"
-            shortDescription="Stable help link ID from helpmap/_redirects" />
-    </composite:interface>
+    <cc:interface>
+        <cc:attribute name="helpId" required="true"
+                      shortDescription="Stable help-link ID from helpmap/_redirects; resolves to https://docs.codenforce.org/help/{helpId}" />
+    </cc:interface>
 
-    <composite:implementation>
-        <div class="restrict-main-contents-io-link link-button help-icon-tightright">
+    <cc:implementation>
+        <div class="restrict-main-contents-io-link link-button">
             <a href="https://docs.codenforce.org/help/#{cc.attrs.helpId}"
                target="_blank">
-                <i class="material-icons" style="display: inline-block">help_outline</i>
+                <i class="material-icons material-icon-inline">help_outline</i>
             </a>
         </div>
-        <div class="restrict-main-contents-io-link link-button help-text-tightleft">
-            <a href="https://docs.codenforce.org/help/#{cc.attrs.helpId}"
-               target="_blank">
-                <h:outputText value="help" />
-            </a>
-        </div>
-    </composite:implementation>
+    </cc:implementation>
 
 </html>
 ```
 
-Usage in any XHTML page (after declaring the `cnf` namespace):
+Usage in any XHTML page — the `resources/components/` library is already imported repo-wide
+(76 existing files) under the `tt` alias, **not** `cnf` as an earlier draft of this doc assumed;
+no new namespace convention is being introduced, and most pages needing a help link likely
+already declare it for some other component:
 
 ```xml
-xmlns:cnf="http://xmlns.jcp.org/jsf/composite/components"
+xmlns:tt="http://xmlns.jcp.org/jsf/composite/components"
 ```
 
 ```xml
-<cnf:helpLinkCC helpId="cecase-events-add" />
+<tt:helpLinkCC helpId="cecase-events-add" />
 ```
 
 The base URL `https://docs.codenforce.org` appears in exactly one place. If the domain ever
@@ -423,7 +423,31 @@ changes: edit one file, recompile once — not 29 scattered XHTML files.
 
 ---
 
+
 ## Migration Plan for Existing Links
+
+**DONE 2026-08-16 (SL.4).** All 28 remaining files (of the 29 below — `occPeriodWorkflow.xhtml`
+was already done as SL.3's pilot) were swept. Of the 21 stable IDs, **9 got a real, verified
+target** (confirmed against actual page content, not guessed) and their occurrences were
+replaced with `<tt:helpLinkCC helpId="..." />`; **12 had no real content anywhere** in the
+`users/` tree after a fresh look, so their hardcoded link markup was **removed from the XHTML
+entirely** rather than left pointing at a permanent homepage-fallback dead end. The 12
+removed links, with context for whoever eventually writes that content, are tracked in
+[system/static-link-orphaned-topics.md](/system/static-link-orphaned-topics) (linked from
+[docbacklog.md](/system/docbacklog)) — not restated here. `helpmap/_redirects` keeps a line for
+all 21 IDs either way (stable IDs are never deleted, only re-targeted later if content shows
+up). See the codenforce repo's `docs/worklog.md` 2026-08-16 entry for the full file-by-file
+record.
+
+**Resolved (9):** `dashboard-case-priority`, `dashboard-case-search`, `property-mark-abandoned`,
+`property-persons-link`, `property-link-mailing-address`, `cecase-management-overview`,
+`occ-permit-generate`, plus the 2 already confirmed in SL.2 (`inspections-fins`,
+`occ-permit-files`).
+
+**Removed pending future content (12):** `cecase-events-add`, `cecase-cross-muni`,
+`cecase-cears-internal`, `code-enter-ordinance`, `code-add-to-codebook`, `code-create-checklist`,
+`cecase-upload-files`, `cecase-add-violation`, `cecase-nov-add-address`, `cecase-nov-prepare`,
+`cecase-nov-add-person`, `property-link-multiple-people`.
 
 ### Files to modify
 
@@ -467,14 +491,22 @@ composite-component duplicates plus a handful of `ce/`-tree pages not walked the
 
 ### Migration steps
 
-1. Create `helpLinkCC.xhtml` composite component.
+1. Create `helpLinkCC.xhtml` composite component. **Done (SL.3)** — icon-only per an explicit
+   exception to the no-icon-only-links rule (a universally-understood "?", no paired text link).
 2. Add the 21 stable IDs to `helpmap/_redirects` with `# TODO` placeholders for target paths not
-   yet published to wiki; each `# TODO` entry should fall back to the docs homepage.
-3. Replace each hardcoded two-div `<a href="...technologyrediscovery.github.io...">` block in
-   each of the 29 files with `<cnf:helpLinkCC helpId="..." />`.
+   yet published to wiki; each `# TODO` entry should fall back to the docs homepage. **Done.**
+3. Replace each hardcoded help-link block in each of the 29 files with
+   `<tt:helpLinkCC helpId="..." />` where a real target exists; **remove the block entirely**
+   (no replacement) where no real target could be found. **Done (SL.4, 2026-08-16)** — see the
+   resolved/removed lists above.
 4. Build and deploy the WAR. This is the **one and only WAR deploy** required by this migration.
-5. As wiki pages are published, update `_redirects` entries (remove `# TODO`, add real path),
-   push to GitHub. CI deploys with no WAR touch.
+   `mvn clean package -DskipTests` is a clean `BUILD SUCCESS`; a real WildFly deploy + browser
+   QA is still the repo owner's to run.
+5. As wiki pages are published for the 12 removed topics, add the help link back
+   (`<tt:helpLinkCC helpId="..." />`) in the file(s) noted in
+   [system/static-link-orphaned-topics.md](/system/static-link-orphaned-topics), and update
+   `_redirects`' matching line from `# TODO` to a real path. This is now a **small, targeted
+   WAR deploy per topic**, not a repeat of the big sweep.
 
 ---
 
@@ -487,7 +519,7 @@ When a developer adds a contextual help link to any new XHTML page:
 2. **If new, add a line to `_redirects`** — commit and push to `boroughforge-wikidocs`. CI
    deploys the new redirect within seconds. If the target wiki page is not yet published, use
    the docs homepage as a temporary fallback and add a `# TODO` comment on the same line.
-3. **Add the component to the XHTML file**: `<cnf:helpLinkCC helpId="your-new-id" />`
+3. **Add the component to the XHTML file**: `<tt:helpLinkCC helpId="your-new-id" />`
 4. Include the namespace declaration on the page if not already present.
 
 The stable ID is permanent. The wiki target in `_redirects` can be changed as many times as
@@ -501,7 +533,7 @@ needed with zero application impact.
 |---|---|---|---|
 | Where a link points (wiki path) | Docs editor edits `_redirects` | No | Auto via CI |
 | Adding a new stable ID | Docs editor adds line to `_redirects` | No | Auto via CI |
-| Adding a help link to a page | XHTML developer uses `<cnf:helpLinkCC>` | **Yes** | No |
+| Adding a help link to a page | XHTML developer uses `<tt:helpLinkCC>` | **Yes** | No |
 | Help link visual style | CSS developer edits `style.css` | **Yes** | No |
 | Docs base domain | One line in `helpLinkCC.xhtml` | **Yes — once** | No |
 

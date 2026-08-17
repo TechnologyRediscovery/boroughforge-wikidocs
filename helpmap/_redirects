@@ -13,36 +13,62 @@
 # Verified against the real Wiki.js tree 2026-08-16 (see codenforce
 # docs/subsystems/documentation/SL-2-helplinks-cicd.md post-mortem) — only 2 of the original
 # 12 hardcoded targets turned out to be real; the other 10 were unverified guesses pointing
-# nowhere. Commented out below (falls back to homepage) until a real page exists to point at.
+# nowhere. During SL.4 (also 2026-08-16), 4 more of those 10 got real confirmed targets after
+# a fresh content pass (dashboard-case-priority, dashboard-case-search, property-persons-link,
+# occ-permit-generate); the remaining 6 are still genuinely unresolved — see
+# system/static-link-orphaned-topics.md.
 # TODO cecase-events-add           (candidate page not yet confirmed)
 # TODO cecase-cross-muni           (candidate page not yet confirmed)
 # TODO cecase-cears-internal       (candidate page not yet confirmed)
-# TODO dashboard-case-priority     (candidate page not yet confirmed)
-# TODO dashboard-case-search       (candidate page not yet confirmed)
+dashboard-case-priority       /users/subsystems/cecase/caseload-manager#caseload-manager
+# confirmed 2026-08-16 (SL.4) — caseload-manager.md's "Caseload manager" section documents
+# the priority-based color-coded case cards.
+dashboard-case-search         /users/subsystems/cecase/caseload-manager#code-enforcement-case-search
+# confirmed 2026-08-16 (SL.4) — same page, "Code Enforcement Case Search" section (the legacy
+# tabular search alternative to the caseload manager).
 inspections-fins             /users/subsystems/cecase/finetracking
 # confirmed 2026-08-16 — "fins" (fines) content lives under `cecase`, not `inspections`; the
 # legacy GitHub Pages path (inspections/fins.html) predates the current subsystem split.
-# TODO code-enter-ordinance        (candidate page not yet confirmed)
-# TODO code-add-to-codebook        (candidate page not yet confirmed)
-# TODO code-create-checklist       (candidate page not yet confirmed)
-# TODO property-persons-link       (likely duplicate of property-link-mailing-address or
-#      property-link-multiple-people below — needs human review before confirming either way)
+# TODO code-enter-ordinance        (candidate page not yet confirmed — codebook/overview.md is
+#      still a stub; see system/static-link-orphaned-topics.md)
+# TODO code-add-to-codebook        (candidate page not yet confirmed — same codebook stub gap)
+# TODO code-create-checklist       (candidate page not yet confirmed — no checklist-authoring
+#      page found in users/ or admin/ trees during SL.4's pass)
+# RESOLVED 2026-08-16 (SL.4) — the original guess here was wrong: this ID is about linking a
+# PERSON to a property/case in general (create-and-link), not mailing addresses or multi-link.
+# Real match confirmed against page content: connecting-people-to-properties.md's whole flow
+# (create a person, connect to current property, choose association type) is exactly this.
+property-persons-link        /users/subsystems/person/connecting-people-to-properties
 occ-permit-files             /users/subsystems/permitting/creating-permit-files
 # confirmed 2026-08-16
-# TODO occ-permit-generate         (candidate page not yet confirmed)
+occ-permit-generate           /users/subsystems/permitting/creating-permit-files#optional-follow-ups
+# confirmed 2026-08-16 (SL.4) — same page as occ-permit-files; the "Optional follow-ups"
+# section's "Create new certificate w/steps" is the actual permit-generation step.
 
 # --- 9 newly discovered (SL.0 re-inventory) — targets not yet assigned/confirmed ---
 # Uncomment and fix the path once each wiki page is confirmed published (see SL-2 impl file
 # "Remaining target assignment" section for candidate pages found during SL.2 setup).
-# TODO property-mark-abandoned          /users/subsystems/property/parcel-info
-# TODO cecase-upload-files              (candidate page not yet confirmed)
-# TODO cecase-add-violation             (candidate page not yet confirmed)
-# TODO cecase-nov-add-address           (candidate page not yet confirmed)
-# TODO cecase-nov-prepare               (candidate page not yet confirmed)
-# TODO cecase-nov-add-person            (candidate page not yet confirmed)
-# TODO property-link-mailing-address    /users/subsystems/property/creating-a-property-linking-mailing-address
-# TODO property-link-multiple-people    /users/subsystems/person/updating-person-property-links
-# TODO cecase-management-overview       (candidate page not yet confirmed)
+property-mark-abandoned              /users/subsystems/property/parcel-info#mark-a-property-as-abandoned
+# confirmed 2026-08-16 (SL.4) — parcel-info.md has a dedicated "Mark a property as abandoned"
+# section.
+# TODO cecase-upload-files              (candidate page not yet confirmed — no files/photos
+#      upload page found in users/ during SL.4's pass; see system/static-link-orphaned-topics.md)
+# TODO cecase-add-violation             (candidate page not yet confirmed — same gap)
+# TODO cecase-nov-add-address           (candidate page not yet confirmed — same gap)
+# TODO cecase-nov-prepare               (candidate page not yet confirmed — same gap)
+# TODO cecase-nov-add-person            (candidate page not yet confirmed — same gap)
+# CORRECTED 2026-08-16 (SL.4) — the pre-existing candidate here (creating-a-property-linking-
+# mailing-address.md) was wrong on inspection: that page is about adding a brand-new property
+# and its own mailing address, not connecting a person to one. The real match is
+# updating-person-property-links.md step 16, "Connect person to Mailing Address".
+property-link-mailing-address        /users/subsystems/person/updating-person-property-links#add-a-new-person-link
+# TODO property-link-multiple-people    (candidate page not yet confirmed — reviewed
+#      updating-person-property-links.md and connecting-people-to-properties.md on 2026-08-16;
+#      neither documents a batch/multi-select link operation. The pre-existing candidate here
+#      was wrong — that page covers a single new person link, not linking several at once.
+#      See system/static-link-orphaned-topics.md)
+cecase-management-overview           /users/subsystems/cecase/overview
+# confirmed 2026-08-16 (SL.4) — this page literally is the case-management user guide.
 
 # --- Full users/ tree coverage (2026-08-16) ---
 # Every page that exists under users/ gets a stable ID here, even ones no XHTML help link

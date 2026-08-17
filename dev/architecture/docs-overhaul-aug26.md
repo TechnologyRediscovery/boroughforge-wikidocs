@@ -10,10 +10,13 @@ and the static-link/nginx redirect implementation. **§11.1 (Letters fast-path) 
 (accounts, basics, permitting, person, property, codebook, cecase) migrated, old files/dirs
 deleted, images moved into per-subsystem `img/` folders, inbound links fixed; see per-row
 status in the §11.3 table and the resolved decisions in §11.8. §11.4's repo-wide grep pass was
-run as part of this cleanup (see §11.3 note). §11.5 (static-link/nginx redirect) and §11.6
-(`cecase` full pilot — the deeper `users/cecases/` folder + `cecases/*.png`, distinct from the
-single overview page migrated in §11.3) remain not started — still gated on VPS/DNS
-provisioning (§11.5) or a dedicated pilot pass (§11.6).
+run as part of this cleanup (see §11.3 note). **§11.6 (`cecase` full pilot) executed
+2026-08-16.** **§11.5 (static-link/nginx redirect) is now substantially complete**: VPS/DNS/CI
+infrastructure is live, the redirect map's content-mapping gaps have been fully audited and
+resolved, and every `users/` page now has a stable ID (see the checklist below for the
+2026-08-16 detail) — the one piece remaining is the cross-repo codenforce-side JSF work
+(`helpLinkCC` composite component, SL.3/SL.4) that actually points hardcoded help links at
+this now-live redirect layer.
 
 **§12 (meta-organization flow) appended 2026-08-12** — specs three cross-repo tracking organs
 (a reverse-chrono **worklog**, a **subsystem-status dashboard**, and a **dev↔docs correlation
@@ -807,15 +810,33 @@ drafted in-repo ahead of time:
 - [x] Create `.github/workflows/deploy-helplinks.yml` — 2026-08-14, see
       [SL-2-helplinks-cicd.md](../../../codenforce/docs/subsystems/documentation/SL-2-helplinks-cicd.md)
       (codenforce repo) for the full runbook.
-- [X 14AUG26 ] **Needs the repo owner, not the agent:** provisioning nginx + certbot on the docs VPS
-      (in progress, see codenforce `SL-1-nginx-tls-vps.md`), DNS for `docs.codenforce.org`, and
-      the three GitHub Actions secrets (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`) plus
-      a scoped sudoers entry on the VPS. Flag when ready to do this together.
-- [ ] **Cross-repo, codenforce Java repo:** build the `helpLinkCC` composite component and wire
-      `<cnf:helpLinkCC helpId="..."/>` into the new Letters panels (`letterTableCC.xhtml`,
-      `letterFlow.xhtml`). Not required to ship docs this weekend (11.0's last item) — the
-      redirect layer can go live and be linked to manually from the docs site before any JSF
-      page references it.
+- [x] **Repo-owner infra — done.** Nginx + certbot on the docs VPS, DNS for
+      `docs.codenforce.org`, the three GitHub Actions secrets
+      (`DOCS_VPS_HOST`/`DOCS_VPS_USER`/`DOCS_VPS_SSH_KEY`), and a scoped sudoers entry are all
+      in place (see codenforce `SL-1-nginx-tls-vps.md` and `SL-2-helplinks-cicd.md`).
+- [x] **2026-08-16 — first fully-green CI/CD deploy confirmed**, verified via a real `cat` of
+      the generated `/etc/nginx/snippets/helplinks.conf` on the VPS — after fixing two real
+      deploy-time bugs hit along the way: a `conf.d`-vs-`snippets/` Nginx context bug (bare
+      `location` blocks are illegal directly under `http{}`, which is what `conf.d/*.conf` gets
+      auto-included into) and a `ufw limit OpenSSH` rate-limit rule dropping mid-job SSH
+      connections from the CI runner. Full detail in `SL-2-helplinks-cicd.md`.
+- [x] **2026-08-16 — redirect-target post-mortem resolved.** All 12 "original" SL.0 stable IDs
+      turned out to be unverified guesses, never checked against the real Wiki.js tree; 2 now
+      have confirmed real targets (`occ-permit-files`, `inspections-fins`), the other 10
+      correctly commented out as `# TODO` pending real content. Verification table in
+      `SL-2-helplinks-cicd.md`.
+- [x] **2026-08-16 — full `users/` tree coverage pass.** New read-only audit script
+      (`helpmap/audit-users-coverage.sh`) confirmed every page under `users/` now has a stable
+      ID in `_redirects` — 48 pages added (32 live, 16 `# TODO` stubs for unpublished pages),
+      zero duplicate IDs across the whole file.
+- [ ] **Cross-repo, codenforce Java repo — next up:** build the `helpLinkCC` composite
+      component (SL.3) and migrate the 56 hardcoded help-link occurrences across 29 XHTML
+      files to use it (SL.4), starting with the new Letters panels (`letterTableCC.xhtml`,
+      `letterFlow.xhtml`). With SL.2's redirect map and CI/CD pipeline now live and
+      confirmed green, this is the last piece needed for users clicking an in-app help link to
+      land on the real, current page on Wiki.js instead of a hardcoded (and eventually stale)
+      GitHub Pages URL. Not required to ship docs (11.0's last item) — the redirect layer
+      already works and can be linked to manually until this lands.
 
 ### 11.6 Phase 5 — `cecase` full pilot (as already planned in §9/§10)
 
