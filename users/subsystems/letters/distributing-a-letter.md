@@ -71,5 +71,9 @@ provider — you don't need to check anywhere else.
 <!-- SCREENSHOT NEEDED: the Email Letter dialog's "Email to letter recipient" tab, showing the
      address picker and the inline "add a new email address" section below it. -->
 
-See also: [Generating and sending a letter](generating-and-sending-a-letter),
-[Printing a letter](printing-a-letter).
+See also: [Generating and sending a letter](/users/subsystems/letters/generating-and-sending-a-letter),
+[Printing a letter](/users/subsystems/letters/printing-a-letter).
+
+---
+
+Back to: [Letters & Emailing — User Guide](/users/subsystems/letters/overview)

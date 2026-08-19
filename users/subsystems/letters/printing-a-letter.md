@@ -20,5 +20,9 @@ General browser/printer setup (Google Chrome, print dialog options, etc.) is the
 other document in CodeNforce — see [Printing from CodeNforce](/users/basics/printing) for
 that general guidance.
 
-See also: [Generating and sending a letter](generating-and-sending-a-letter),
-[Distributing a letter](distributing-a-letter).
+See also: [Generating and sending a letter](/users/subsystems/letters/generating-and-sending-a-letter),
+[Distributing a letter](/users/subsystems/letters/distributing-a-letter).
+
+---
+
+Back to: [Letters & Emailing — User Guide](/users/subsystems/letters/overview)

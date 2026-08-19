@@ -134,8 +134,12 @@ letters-generating-and-sending-a-letter       /users/subsystems/letters/generati
 letters-generic-officer-signatures            /users/subsystems/letters/generic-officer-signatures
 letters-overview                              /users/subsystems/letters/overview
 letters-printing-a-letter                     /users/subsystems/letters/printing-a-letter
-# TODO letters-letter-details        (candidate page — LD.U6 in letters-docs-plan.md, not yet
-#      published; help icon already wired into letterTableCC.xhtml's letter-details-dialog)
+letters-letter-details                        /users/subsystems/letters/letter-details
+
+# admin/subsystems/letters/
+letters-creating-and-editing-letter-templates /admin/subsystems/letters/creating-and-editing-letter-templates
+letters-mail-merge-token-reference            /admin/subsystems/letters/mail-merge-token-reference
+letters-managing-print-styles                 /admin/subsystems/letters/managing-print-styles
 
 # users/subsystems/mapping/
 # TODO mapping-overview                  /users/subsystems/mapping/overview   # stub — not yet published

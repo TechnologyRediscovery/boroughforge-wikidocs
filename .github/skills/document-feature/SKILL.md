@@ -71,6 +71,15 @@ Body conventions:
 - Cross-link the new page from its subsystem's `overview.md`/hub page. Never link to a page
   that doesn't exist yet — mention upcoming/GAP pages as plain text (e.g. "*(coming soon)*"),
   not as a markdown link, until the target file is actually created.
+- **Cross-page links must always be absolute paths** (`/branch/subsystems/slug/page-slug`) —
+  never a bare relative filename like `[text](other-page)`. Confirmed 2026-08-19: Wiki.js
+  resolves a bare relative link against the *current page's own full path* (treating it as a
+  directory), not against its containing folder — `[X](sibling-page)` written on
+  `users/subsystems/letters/overview` renders as `.../letters/overview/sibling-page` (404)
+  instead of `.../letters/sibling-page`. This silently broke an entire subsystem's
+  Topics/See-also links even though every target file existed. Same-page `#anchor` links are
+  unaffected (no routing involved). Always use the full absolute path for any link to a
+  different page, full stop.
 
 ## Step 2 — Register the stable-ID redirect
 

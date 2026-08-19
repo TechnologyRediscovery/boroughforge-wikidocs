@@ -14,6 +14,19 @@ Letters are authored from reusable **templates**, managed from Muni Tools > Lett
 Manager. This page covers the setup work a system administrator does once per municipality;
 day-to-day letter creation and sending is covered in the [user guide](/users/subsystems/letters/overview).
 
+## Topics
+
+- [Creating and editing letter templates](/admin/subsystems/letters/creating-and-editing-letter-templates) —
+  every field in the template editor: parent object type filtering, format vs. print style,
+  header images, default code elements, and cloning a template.
+- [Mail-merge token reference](/admin/subsystems/letters/mail-merge-token-reference) — the full
+  catalog of template insertion points, grouped by category, with which parent types each
+  applies to.
+- [Managing print styles](/admin/subsystems/letters/managing-print-styles) — portrait vs.
+  landscape, header image width defaults, and the addressee-block margin fields.
+- [Generic officer signatures](/admin/subsystems/letters/generic-officer-signatures) — how a
+  municipality can sign letters from a generic person instead of the individual officer.
+
 ## Template Manager
 
 - Create, edit, and clone letter templates. Cloning a template is the fastest way to make a
@@ -28,8 +41,9 @@ day-to-day letter creation and sending is covered in the [user guide](/users/sub
 
 ## Generic officer signatures
 
-See [Generic officer signatures](generic-officer-signatures) for the full setup steps — a
-municipality can choose to sign letters from a generic/arbitrary person rather than the
-individual issuing officer, which is a one-time setup task done here in the admin side.
+See [Generic officer signatures](/admin/subsystems/letters/generic-officer-signatures) for the
+full setup steps — a municipality can choose to sign letters from a generic/arbitrary person
+rather than the individual issuing officer, which is a one-time setup task done here in the
+admin side.
 
 See also: [subsystem registry](/system/subsystem-registry), entry #12.

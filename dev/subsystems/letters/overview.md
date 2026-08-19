@@ -19,10 +19,14 @@ substitution), `LetterTemplate`/`LetterCodeViolation`/`LetterDistributionEntry` 
 
 - **Clone/copy** — `LetterFlowMode` (`NEW_LETTER` / `PURE_CLONE` / `EDITABLE_COPY`) drives which
   fields are locked in the flow dialog. Pure clone writes `letter.cloneof_letterid` for a
-  court-defensible identical copy; editable copy pre-fills text but sets no lineage FK.
+  court-defensible identical copy; editable copy pre-fills text but sets no lineage FK. See the
+  [clone/copy architecture](/dev/subsystems/letters/clone-copy-architecture) doc for the
+  mode-chooser dialog and the nested-form HTML5 parsing bug it once had.
 - **Distribution** — `LetterDistributionEntry` (renamed from `LetterMailingAttempt`) records
   every distribution channel (mail, email, posting/placard, door-hanger) in one history,
-  surfaced in `letterTableCC.xhtml`'s unified Distribution/Correspondence panel.
+  surfaced in `letterTableCC.xhtml`'s unified Distribution/Correspondence panel. See
+  [distribution channels and webhooks](/dev/subsystems/letters/distribution-channels-and-webhooks)
+  for the channel enum, the Resend email send path, and the inbound delivery-status webhook.
 - **PDF** — `letter_generateFinalizationPDF()` renders the frozen HTML to PDF via
   openhtmltopdf-pdfbox at finalization time, inlining photos as base64 data URIs. See the
   [PDF & document encoding primer](/dev/subsystems/letters/pdf-encoding-primer) for the
@@ -39,9 +43,13 @@ substitution), `LetterTemplate`/`LetterCodeViolation`/`LetterDistributionEntry` 
   [PDF image compression primer](/dev/subsystems/letters/image-compression-primer) for the
   implementation details, the parallelization rationale, and a JPEG/resolution deep-dive.
 - **Email** — `letter_distributeByEmail()` sends via Resend, with inbound delivery-status
-  webhooks (`LetterEmailWebhookResource`) updating the distribution entry.
+  webhooks (`LetterEmailWebhookResource`) updating the distribution entry. Full webhook
+  signature-verification details are also in the
+  [distribution channels and webhooks](/dev/subsystems/letters/distribution-channels-and-webhooks) doc.
 - **Mail-merge tokens** — canonical registry is `LetterTokenType`; `LetterHtmlRenderer`
-  performs substitution, gated by `isApplicableTo(LetterParentType)`.
+  performs substitution, gated by `isApplicableTo(LetterParentType)`. See the
+  [mail-merge token implementation](/dev/subsystems/letters/mail-merge-token-implementation)
+  doc for the two-pass substitution architecture.
 
 Full implementation history, as-built deviations from spec, and the active backlog live in
 the codenforce repo at `docs/subsystems/letters+emailing/` (`letterUpgrades-jul2026.md`,

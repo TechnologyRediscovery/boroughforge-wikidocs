@@ -26,4 +26,8 @@ sign a specific letter with a non-generic person instead, when that's needed.
 
 ![A finalized letter showing the generic signer's name and title in the signature block](img/letterwithgenericsigner.png)
 
-See also: [Generating and sending a letter](generating-and-sending-a-letter).
+See also: [Generating and sending a letter](/users/subsystems/letters/generating-and-sending-a-letter).
+
+---
+
+Back to: [Letters & Emailing — User Guide](/users/subsystems/letters/overview)
