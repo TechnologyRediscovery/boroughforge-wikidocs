@@ -211,3 +211,49 @@ Two independent claims requiring independent justification:
 2. **"No one can manufacture a collision on purpose"** — false for SHA-1 since 2017; Git's continued safety rests on `sha1dc` and the practical difficulty of exploiting collisions within Git's object model, a materially weaker guarantee.
 
 Ordinary same-repository operations — comparing one's own index against one's own HEAD — involve no adversary and sit entirely in pillar-one territory, where confidence is effectively total. The general lesson: "X is astronomically improbable" and "X cannot be caused deliberately" are different theorems, and SHA-1 is the canonical case where the first survived while the second fell.
+
+# Recovering an accidentally deleted file
+
+The correct command depends entirely on *how far the deletion has traveled* through the three
+zones (working tree → index → object store — see "The three zones," above). Each stage further
+along requires reaching one step further back to find a tree that still has the file.
+
+| State when you notice | `git status` shows | Recovery command | Rewrites history? |
+|---|---|---|---|
+| Deleted, not staged | `deleted:` under **"Changes not staged for commit"** | `git restore <path>` | No |
+| Deleted, staged | `deleted:` under **"Changes to be committed"** | `git restore --staged <path>` then `git restore <path>` | No |
+| Deletion committed, not pushed | clean tree; `git log` shows the deletion as the tip commit | `git checkout <SHA-before-deletion> -- <path>` | No (targeted restore, not a reset) |
+| Deletion committed *and* pushed | clean tree; deletion commit is on `origin` too | Same as above — `git checkout <SHA-before-deletion> -- <path>`, then commit the restoration as a new commit | No |
+
+**Finding `<SHA-before-deletion>`** when the deletion is already committed:
+
+```bash
+# Find the commit that removed the file — its PARENT is the last commit that still has it
+git log --oneline --diff-filter=D -- <path>
+
+# Restore the file's content from that parent commit into the working tree + index
+git checkout <SHA-before-deletion> -- <path>
+
+# Stage and commit the restoration (this does NOT rewrite history — it's a new forward commit)
+git add <path>
+git commit -m "restore: recover accidentally deleted <path>"
+```
+
+**Scoping caution:** always pass the specific `<path>`, never a bare `.` or no path at all, when
+running `restore`/`checkout` for a single-file recovery. An unscoped command reverts *every*
+unstaged or uncommitted change in the tree, not just the one deletion — a real risk when an
+unrelated edit (e.g. a docs file) happens to be sitting in the same `git status` output.
+
+**Sanity-check before trusting the recovery** — confirms git still holds the content without
+actually writing anything back yet:
+
+```bash
+git diff -- <path>              # unstaged-deletion case: full file shown as a deletion diff
+git diff <SHA-before-deletion> -- <path>   # committed-deletion case: diff against the old blob
+```
+
+**The only genuinely unrecoverable case:** deletion committed, pushed, *and* enough time has
+passed that `git gc` has swept the now-unreachable blob from the object store on every clone that
+matters. Even then there's a real window — unreferenced objects aren't collected immediately, and
+`git gc --prune=now` is required to force it. In practice, for a solo/small-team repo without
+routine manual GC, this window is generous.

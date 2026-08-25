@@ -142,8 +142,8 @@ Proposed registry (slug is the folder name used everywhere in this repo):
 | `accounts` | `N_USER` | domain | `n_user` | dev, admin, users(basics) |
 | `municipality` | `I_MUNICIPALITY` | domain | `i_municipality` | dev, admin |
 | `codebook` | `II_CODEBOOK` | domain | `ii_codebook` | dev, admin, users |
-| `property` | `III_PROPERTY` | domain | `iii_property` | dev, users, public |
-| `person` | `IV_PERSON` | domain | `iv_person` | dev, users |
+| `property` | `III_PROPERTY` | domain | `property` | dev, users, public |
+| `person` | `IV_PERSON` | domain | `person` | dev, users |
 | `event` | `V_EVENT` | domain | `v_event` | dev, users |
 | `occupancy` | `VI_OCCPERIOD` | domain | `vi_occperiod` | dev, users |
 | `cecase` | `VII_CECASE` | domain | `vii_cecase` | dev, users |
@@ -1020,7 +1020,7 @@ are the whole point; stable columns (slug, dirs) are copied from the registry on
 | 12 | `letters` | 2026-08-12 | Pt III: III.G IN-PROGRESS, rest DONE | [letters-index-pt3](subsystems/letters+emailing/letters-index-pt3.md) | published (users+admin) |
 | — | `system-general-xsub` | 2026-08-12 | SL.* + FC.* all PLANNING | [xsubsystem-feature-index](subsystems/system-general-xsubsystem/xsubsystem-feature-index.md) | n/a (dev-only) |
 | 10 | `cecase` | 2026-08-05 | pilot migration pending | [vii_cecase/](subsystems/vii_cecase/) | stub (users) |
-| 4 | `property` | 2026-07-28 | — | [iii_property/](subsystems/iii_property/) | stub (users) |
+| 4 | `property` | 2026-07-28 | — | [property/](subsystems/property/) | stub (users) |
 | … | … | … | … | … | … |
 
 - **Last worked** is bumped by whoever (usually the AI, per the every-turn rule) touches that
@@ -1079,8 +1079,8 @@ memory files, cross-index links) reference the current dir names.
 | `n_user` | `accounts` | `accounts` |
 | `i_municipality` | `municipality` | `municipality` |
 | `ii_codebook` | `codebook` | `codebook` |
-| `iii_property` | `property` | `property` |
-| `iv_person` | `person` | `person` |
+| `property` (renamed 2026-08-24, was `iii_property`) | `property` | `property` |
+| `person` (renamed 2026-08-20, was `iv_person`) | `person` | `person` |
 | `v_event` | `event` | `event` |
 | `vi_occperiod` | `occupancy` | `occupancy` |
 | `vii_cecase` | `cecase` | `cecase` |

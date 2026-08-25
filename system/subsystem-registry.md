@@ -24,8 +24,8 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | 1 | [`accounts`](/system/subsystems/accounts) | User Accounts | `N_USER` | `n_user` |
 | 2 | [`municipality`](/system/subsystems/municipality) (muni) | Municipality Configuration | `I_MUNICIPALITY` | `i_municipality` |
 | 3 | [`codebook`](/system/subsystems/codebook) | Codebook (Ordinances) | `II_CODEBOOK` | `ii_codebook` |
-| 4 | [`property`](/system/subsystems/property) | Property | `III_PROPERTY` | `iii_property` |
-| 5 | [`person`](/system/subsystems/person) | Person | `IV_PERSON` | `iv_person` |
+| 4 | [`property`](/system/subsystems/property) | Property | `III_PROPERTY` | `property` |
+| 5 | [`person`](/system/subsystems/person) | Person | `IV_PERSON` | `person` |
 | 6 | [`event`](/system/subsystems/event) | Events / Calendar | `V_EVENT` | `v_event` |
 
 ## Occupancy & code enforcement workflow

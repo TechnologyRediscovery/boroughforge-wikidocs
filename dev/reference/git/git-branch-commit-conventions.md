@@ -11,7 +11,7 @@ dateCreated: 2026-08-16T15:44:15.000Z
 # Git branch & commit conventions
 
 This document is the companion piece to
-**[git-mental-model.md](/dev/reference/git-mental-model)**, which covers the object store, refs,
+**[git-mental-model.md](/dev/reference/git/git-mental-model)**, which covers the object store, refs,
 reachability, and worktrees from the ground up. That document explains *how git works*; this one
 specifies *the conventions CNF actually follows on top of that mechanism* — branch naming, merge
 strategy, commit-message discipline, and milestone tagging — plus the command set for

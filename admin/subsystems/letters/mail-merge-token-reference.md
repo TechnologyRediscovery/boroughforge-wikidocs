@@ -47,6 +47,8 @@ reference** panel, and inline from the letter flow's editor while drafting a let
 | `<<SENDER_BLOCK>>` | A fuller sender block (name, title, etc.). Not editable. | All parent types |
 | `<<SENDER_SIGNATURE_IMAGE>>` | The signer's signature image, if one is on file. Not editable. | All parent types |
 | `<<GENERIC_SENDER_NAME>>` | The municipality's configured generic sender name, independent of who the actual signing officer is. Not editable. | All parent types |
+| `<<SENDER_PHONE>>` | The signing officer's highest-ranked (primary) phone number by itself, for direct insertion. Not editable. | All parent types |
+| `<<SENDER_EMAIL>>` | The signing officer's highest-ranked (primary) email address by itself, for direct insertion. Not editable. | All parent types |
 
 ## Municipality
 
@@ -63,6 +65,8 @@ reference** panel, and inline from the letter flow's editor while drafting a let
 | `<<PARCEL_ID>>` | The target property's parcel/tax ID. Not editable. | All parent types |
 | `<<TARGET_PROPERTY_ADDRESS_1_LINE>>` | The target property's address, single-line format. Not editable. | All parent types |
 | `<<TARGET_PROPERTY_ADDRESS_2_LINE>>` | The target property's address, two-line format. Not editable. | All parent types |
+| `<<TARGET_PROPERTY_ADDRESS_FULL_CSZ_NO_BREAK>>` | The target property's full address — building/street and city/state/zip together on one flat line, no line break. Not editable. | All parent types |
+| `<<TARGET_UNIT_NUMBER>>` | Formatted "Unit N" line for the letter's parent CE case, if the case has a unit on file (a CE case can only ever be linked to one unit). Empty when there's no unit. Not editable. | CECASE only |
 | `<<UNIT_LIST>>` | A list of the property's units. Not editable. | **Property/Parcel only** — renders as empty on CE case and permit file letters |
 
 ## Violations

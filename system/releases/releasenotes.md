@@ -10,7 +10,16 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
-## Release 5.0.0 on 12-2026
+## Release 5.1.0 on 20-Aug-2026
+
+- **LSA7-D Letters:** Fixed address 1 and 2 line injection points not printing. Also added a one line city, state, zip injectable along with issuing office phone/email injection.
+- **LSA7-D Letters:** Allow multiple letter parents for each template
+- **LSA7-D Letters:** Converted to a dedicated LetterStyle that specifies header image height, not width, and this leaves all legacy NOV/Letters 
+- **LSA7-D Letters:** A bunch of bug fixes from Sharpsburg testing: Issuing officer reverting back to current user, display of proper print styles in the letter flow.
+- **LSA7-D Letters:** Migration facility allows easy construction of new Letter system template from legacy NOV system.
+- **LSA7-Z Property range addresses:** Fixed bug concerning a property's display address improperly reverting to piece of a range. Built in manual override of property mailing address links via the MAD link priority. If any link has a priority 2 or higher, then highest priority displays as property primary address link, regardless of the underlying logic in the Linked Object Role manager.
+
+## Release 5.0.0 on 18-Aug-2026
 - **LSA7-D Letters overhaul:** Our new letter subsystem includes a JPEG image compression tool! A letter with 8 images taken at full smartphone resolution was reduced from 55.2 MiB to 1.6 MiB! With automatic emailing of letters to recipients, the attached PDF shouldn't blow up any inboxes. AND, since we got compression working for new letters, auto-compression has now been extended to field inspection reports! Images viewed in normal browser view mode (the ugly off-center dialog) are NOT compressed at all--all pixes are sent to the browser for zooming way in. 
 - **LSA7-D Field inspection compression:** Field inspection reports now display recompressed jpeg images! No more third party pdf compression tools. This also applies to the new Letters subsystem.
 - **LSA7-G Workflow engine pre-release:** The rental registry and related occupancy workflow engine is now live for pre-release feedback and testing.
