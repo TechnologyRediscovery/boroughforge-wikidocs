@@ -35,7 +35,7 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | 7 | [`occupancy`](/system/subsystems/occupancy) | Occupancy Periods | `VI_OCCPERIOD` | `vi_occperiod` | Occ periods = permit files in the UI; contain statuses, have a manager and type. |
 | 8 | [`permitting`](/system/subsystems/permitting) | Permitting | *(none)* | `permitting` | Distinct subsystem — permit files live on the occupancy side of CNF (as opposed to the code-enforcement/violation side), but permitting is significant and critical enough to stand on its own rather than being folded into `occupancy`. |
 | 9 | [`inspections`](/system/subsystems/inspections) (fins)| Inspections | *(none)* | `inspections` | Objects span both `occupancy` and `cecase` — inspections are not exclusive to either. Kept as its own subsystem rather than being split or nested under one parent. |
-| 10 | [`cecase`](/system/subsystems/cecase) | Code Enforcement Cases | `VII_CECASE` | `vii_cecase` | |
+| 10 | [`cecase`](/system/subsystems/cecase) | Code Enforcement Cases | `VII_CECASE` | `cecase` | Renamed from `vii_cecase` 2026-08-27. |
 | 11 | [`evaluations`](/system/subsystems/evaluations) (evals)| Evaluations | *(none)* | `evaluations` | |
 
 ## Supporting subsystems

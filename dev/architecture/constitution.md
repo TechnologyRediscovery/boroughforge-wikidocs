@@ -57,9 +57,10 @@ Invariants:
   subsystem folder exists in any branch (or in codenforce `docs/subsystems/`) without a
   registry row.
 - **codenforce dir alignment is incremental.** The codenforce `docs/subsystems/` tree still uses
-  legacy dirs (`vii_cecase`, `letters+emailing`); the registry's "CNF source dir" column is the
+  a legacy dir (`letters+emailing`); the registry's "CNF source dir" column is the
   crosswalk. Rename a dir to its slug only when that subsystem is *already being worked*
   (`git mv` + fix every inbound link in the same commit). New dirs use the slug from day one.
+  (`vii_cecase` → `cecase` renamed 2026-08-27.)
   See [docs-overhaul-aug26 §12.5](/dev/architecture/docs-overhaul-aug26).
 
 ## 3. The three tracking organs

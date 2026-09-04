@@ -10,6 +10,10 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
+
+## Release 5.5.1 on 31-Aug-2026
+- Bug fix: Address links assigned nonzero priority on initial write, fouling up primary address selection logic.
+
 ## Release 5.4.0 on 27-Aug-2026
 - **LSA7-D Letters:** Letters no longer append a note about photo compression at the end of each generated letter.
 - **LSA7-R Person links:** A new unified person linking dialog allows easy linking of session person or searched for person to any other session object in a single dialog, no stacked link role selection dialog. 
