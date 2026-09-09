@@ -46,7 +46,7 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 | 13 | [`payment`](/system/subsystems/payment) | Payment Processing | `X_PAYMENT` | `x_payment` | |
 | 14 | [`reporting`](/system/subsystems/reporting) | Reporting | *(none)* | `xi_report` | |
 | 15 | [`files`](/system/subsystems/files) | File / Blob Storage | `XII_BLOB` | `xii_blob` | |
-| 16 | [`mapping`](/system/subsystems/mapping) | Spatial / GIS Mapping | *(none)* | `xiv_spatial` | |
+| 16 | [`mapping`](/system/subsystems/mapping) | Spatial / GIS Mapping | *(none)* | `mapping` | Renamed from the reserved `xiv_spatial` 2026-09-04, when the codenforce `docs/subsystems/mapping/` dir was actually created (first real content) — per the "new subsystem dirs use the registry slug from day one" rule. |
 | 17 | [`communication`](/system/subsystems/communication) (comms)| Communication | *(none)* | *(none)* | Emailing infrastructure plus planned SMS support. Overlaps in name with `letters` (which owns letter *content/template authoring*) — `communication` is meant as the delivery/transport layer. Flag for a future pass on whether these two should merge once both have real content. |
 | 18 | [`workflow-builder`](/system/subsystems/workflow-builder) (workflow) | Workflow Builder | *(none)* | `workflows` | The Workflow Builder *engine/feature* itself — do not confuse with cross-subsystem business-process guides, which live under each branch's `best-practices/` folder instead (see overhaul plan §5). |
 | 19 | [`search`](/system/subsystems/search) | Search | *(none)* | *(none)* | Cross-subsystem search infrastructure (`SearchParams`, `QueryEnum`, per-entity search UI). Touches nearly every domain subsystem's data model. |
