@@ -22,6 +22,7 @@ This document describes the backup architecture for the CodeNforce (`cogdb`) Pos
 This is a living document. Sections marked **[NOT YET IMPLEMENTED]** describe the target architecture; sections marked **[IMPLEMENTED]** describe what is currently in place.
 
 **Companion documents:**
+- [PostgreSQL user and role administration](/dev/subsystems/db/postgres-user-admin-guide) — the permission model, and the read-only `cnf_backup` role these scripts should authenticate as instead of `sylvia`
 - `postgresql-cluster-hygiene.md` — cluster inventory, version management, `pg_upgradecluster` procedure
 - `wal-g-setup.md` — step-by-step WAL-G installation and Backblaze B2 configuration (forthcoming)
 - `backup-restore-runbook.md` — the fast-path restore procedure for incident response (forthcoming)
@@ -375,13 +376,14 @@ sudo parted /dev/sda --script mklabel gpt
 #   to physical sector boundaries (4K Advanced Format drives).
 #   Misaligned partitions cause write amplification — each logical write
 #   triggers a read-modify-write on the physical 4K sector.
-# '500GiB' — end at 500 GiB. Adjust based on expected PostgreSQL backup growth.
-sudo parted /dev/sda --script mkpart primary xfs 1MiB 500GiB
+# '3.5TiB' — end of the PostgreSQL partition. Sized for a multi-hundred-GB blob
+#   baseline plus a year of dated incrementals without pruning.
+sudo parted /dev/sda --script mkpart primary xfs 1MiB 3.5TiB
 
 # Create partition 2: Windows-compatible storage (code officer photos, etc.)
-# '500GiB' — start where partition 1 ends.
+# '3.5TiB' — start where partition 1 ends.
 # '100%' — use all remaining space to the end of the disk.
-sudo parted /dev/sda --script mkpart primary exfat 500GiB 100%
+sudo parted /dev/sda --script mkpart primary exfat 3.5TiB 100%
 
 # Verify the result. Should show two partitions with correct sizes.
 # 'print' shows the partition table.
@@ -522,16 +524,36 @@ ssh -f edarsow@citfdrop -L 32000:localhost:5432 -N
 # -N: no remote command — the SSH session exists only to hold the tunnel open.
 ```
 
-Both dump commands below assume this tunnel is up. Bring it up if it isn't, before dumping:
+All dump commands below assume this tunnel is already up. **Bring it up yourself, as a separate
+step, before running a backup** — the backup script must never invoke `ssh` itself:
 
 ```bash
-if ! nc -z localhost 32000 2>/dev/null; then
-  ~/scripts/pgcitftunnel.sh
-  sleep 2
-  # -f above forks after auth; give sshd a moment to bind the local port
-  # before the first pg_dump connection attempt.
+# In cnfprodbak.sh — check only, never launch.
+if ! (exec 3<>/dev/tcp/127.0.0.1/"${PGPORT}") 2>/dev/null; then
+  echo "Nothing listening on 127.0.0.1:${PGPORT} — start the SSH tunnel first, then re-run." >&2
+  exit 1
 fi
 ```
+
+**Corrected 2026-09-13 — the script used to start the tunnel itself, and that was wrong on
+two counts.** Earlier revisions of this page had the script call `pgcitftunnel.sh` when the
+port looked closed. In practice that meant an **SSH key passphrase prompt appeared in the
+middle of a backup run**, which reads as though `pg_dump` is asking for it. It is not: the
+only credential a backup run should ever ask for is the database role's. Starting the tunnel
+is a separate, deliberate act by the operator.
+
+The check itself also had two silent failure modes, both of which made a *live* tunnel look
+dead and so triggered that spurious ssh launch:
+
+- **`nc -z localhost "${PGPORT}"` resolves `localhost` to `::1` first on this machine**
+  (`getent hosts localhost` → `::1 localhost`). An `ssh -L` tunnel bound to the IPv4 loopback
+  is invisible to that probe. Testing `127.0.0.1` explicitly removes the ambiguity. Note this
+  affects the *probe* only — libpq walks every address `getaddrinfo` returns, so `psql -h
+  localhost` still connects fine, which is why `PGHOST` is deliberately left as `localhost`:
+  changing it to `127.0.0.1` would stop a `localhost:…` line in `~/.pgpass` from matching and
+  reintroduce a password prompt.
+- **`2>/dev/null` swallowed everything**, so a missing or broken `nc` was indistinguishable
+  from a closed port. The bash `/dev/tcp` form needs no external binary at all.
 
 The tunnel stays up in the background (`-f`/`-N`) after the script exits — no need to tear it
 down between runs. To close it manually: `pkill -f "L 32000:localhost:5432"`.
@@ -543,18 +565,45 @@ not two separate scripts — `codeconnect/database/scripts/cnfprodbak.sh` in the
 repo:
 
 ```bash
-./cnfprodbak.sh structural   # schema + all non-blob row data
-./cnfprodbak.sh blobs        # blobbytes row data only
+./cnfprodbak.sh structural          # schema + all non-blob row data
+./cnfprodbak.sh blobs               # full blobbytes row data
+./cnfprodbak.sh incremental 65001   # blobbytes rows from bytesid 65001 upward
 ```
 
-Both modes share the same tunnel-check, connection variables, and `BACKUP_ROOT`. The real
-script (real role name, real local paths) is **gitignored** — it embeds prod-adjacent
-identifiers (the `sylvia` role name, local backup paths) that are unnecessary reconnaissance
-value if pushed to a repo shared with collaborators, matching this repo's existing
-`codenforce.properties`/`.template` convention. A genericized, committed twin lives alongside
-it — `codeconnect/database/scripts/cnfprodbak.sh.template` — copy it, fill in the
-placeholders, and that copy is what actually runs. `DB_USER` is `sylvia`, the role with
-`SELECT` on all tables (not `postgres`, which was a stand-in during planning).
+All three modes share the same tunnel-check, connection variables, and `BACKUP_ROOT`.
+`DB_USER` is `sylvia`, the role with `SELECT` on all tables (not `postgres`, which was a
+stand-in during planning).
+
+**Split-out convention (corrected 2026-09-13):** the *real* scripts — real role name, real
+local paths — stay **out of version control**, since those are prod-adjacent identifiers with
+no value to a collaborator and real reconnaissance value to anyone else, matching this repo's
+existing `codenforce.properties`/`.template` convention. What is committed is a genericized
+`.template` twin of each: copy it, fill in the `CHANGEME` placeholders, and that copy is what
+actually runs.
+
+Every script in `codeconnect/database/scripts/` now has one:
+
+| Template (committed) | What the filled-in copy does | Writes? |
+|---|---|---|
+| `cnfprodbak.sh.template` | structural / blobs / incremental dumps | no |
+| `verify-structural-restore.sh.template` | Level 2 spot restore of a structural dump | scratch DB only |
+| `verify-blob-restore.sh.template` | Level 2 blob restore + content checksum | scratch DB only |
+| `restore-blob-increments.sh.template` | replays incremental `.copy` files onto a baseline | **yes** — see its prod-name guard |
+| `extract-blob.sh.template` | pulls one blob back out to a file on disk | no |
+
+**Where the real copies live:** outside the repository — alongside the tunnel script in the
+operator's own `~/scripts/`, not in an ignored subdirectory inside the checkout. An ignored
+path in-tree looks safer than it is: `git clean -xdf` **deletes ignored files**, so a routine
+clean can wipe the only copy of a working script. These are workstation artifacts anyway —
+they depend on the local tunnel script and on local mount paths, and cannot run from any other
+checkout.
+
+Earlier revisions of this page described this split as already done. **It was not** — the real
+`cnfprodbak.sh` was committed verbatim on a local feature branch for several days before this
+was caught. It was never pushed to either remote (verified 2026-09-13: the branch had no
+upstream configured and no remote-tracking ref contained the file), and it carried no
+credentials — only a role name and local paths — so the exposure was reconnaissance-level with
+nothing to rotate.
 
 **A structural gotcha this doc's original one-flag-per-line-with-inline-comment style hit in
 practice:** a bare `# comment`-only line inside a `\`-continued command has no trailing
@@ -565,10 +614,11 @@ uses a bash array for `pg_dump`'s arguments instead — each array element can c
 trailing comment safely, since newlines inside `( … )` don't need escaping the way a plain
 `\`-continued command line does.
 
-**First run (2026-09-07):** `./cnfprodbak.sh structural` completed successfully — 76 MB.
-`./cnfprodbak.sh blobs` is running as of this writing; expected size is 150+ GB. See
+**First run (2026-09-07):** `./cnfprodbak.sh structural` completed successfully — 78 MB.
+`./cnfprodbak.sh blobs` completed the same day at 15:38 — **163 GB** in a single `5168.dat`
+plus a 1.3 KB `toc.dat`. Week 2 (2026-09-13) added a second structural dump at 79 MB. See
 "Incremental blob backup strategy" below for why subsequent weekly runs won't re-transfer
-that same volume every time.
+that 163 GB every time.
 
 ### Production load considerations
 
@@ -604,14 +654,14 @@ pg_restore --version
 
 ---
 
-## Incremental blob backup strategy [PROPOSED — not yet implemented]
+## Incremental blob backup strategy [IMPLEMENTED 2026-09-13 — not yet exercised against prod]
 
 ### The problem
 
-The structural dump is 76 MB — trivial to re-transfer weekly. The blob dump is the opposite:
-150+ GB today and only growing. Re-running a full `pg_dump -t public.blobbytes` every week
+The structural dump is 78 MB — trivial to re-transfer weekly. The blob dump is the opposite:
+163 GB today and only growing. Re-running a full `pg_dump -t public.blobbytes` every week
 means re-reading, re-transferring, and re-writing every blob already sitting on the WD drive,
-just to pick up the handful of photos/documents added since last week. Re-copying 150+ GB
+just to pick up the handful of photos/documents added since last week. Re-copying 163 GB
 weekly is not sustainable against a typical bandwidth cap — this needs an actual incremental
 strategy, not a smaller compression flag.
 
@@ -674,36 +724,136 @@ also work, but a sequence has no timezone/clock-skew ambiguity at the boundary.)
 right tool for a filtered extract is `psql`'s `\copy`, which wraps server-side `COPY` and
 streams through the client connection (works over the tunnel exactly like `pg_dump` does).
 
+### As implemented: `cnfprodbak.sh incremental <bytesid>`
+
+The mode takes the starting `bytesid` **as an argument** and copies that row and every row
+above it. There is deliberately **no state file** on disk:
+
 ```bash
-STATE_FILE="/mnt/cnfpg_backup/state/blobbytes_last_bytesid"
-LAST_ID=$(cat "${STATE_FILE}" 2>/dev/null || echo 0)
-
-# Freeze the upper bound before the COPY so a concurrent insert mid-run can't
-# produce an inconsistent "some of this batch, none of the next" result.
-NEW_MAX=$(psql -h "${PGHOST}" -p "${PGPORT}" -U "${DB_USER}" -d "${DB_NAME}" -tAc \
-  "SELECT COALESCE(max(bytesid), ${LAST_ID}) FROM public.blobbytes;")
-
-OUT_FILE="/mnt/cnfpg_backup/dumps/blobbytes_incr_${DATE}_${LAST_ID}-${NEW_MAX}.copy"
-
-psql -h "${PGHOST}" -p "${PGPORT}" -U "${DB_USER}" -d "${DB_NAME}" -c "\copy (
-  SELECT bytesid, createdts, blob, uploadedby_userid, filename, bobsource_sourceid
-  FROM public.blobbytes
-  WHERE bytesid > ${LAST_ID} AND bytesid <= ${NEW_MAX}
-  ORDER BY bytesid
-) TO '${OUT_FILE}' WITH (FORMAT binary)"
-# FORMAT binary, not csv: bytea in text/CSV format is hex-escaped (~2x size).
-# Binary COPY format is the closest to on-disk size, and losslessly round-trips
-# back in with \copy ... FROM ... WITH (FORMAT binary), as long as the target
-# table's column types/order match exactly.
-
-echo "${NEW_MAX}" > "${STATE_FILE}"
+./cnfprodbak.sh incremental 65001
 ```
 
-A typical week's delta is however many photos/documents were uploaded that week — a few
-hundred MB at most for a single-municipality deployment, not 150 GB. That actually fits in a
-bandwidth cap.
+Deciding where to start is a judgement call made by a human looking at the data, and a
+persisted high-water mark is exactly the kind of state that silently advances past rows that
+were never actually written. Passing the number explicitly keeps that decision visible, and
+makes re-running an overlapping range trivial. The run prints (and writes to a `.meta`
+sidecar) the row count and a content checksum for the range it captured, so the next run's
+starting number can be chosen from real evidence rather than bookkeeping.
 
-### What this doesn't solve, and the mitigation
+Output lands as `blobbytes_incr_<YYYYMMDD>_<from>-<to>.copy` next to the dated dump
+directories, with a matching `.meta`.
+
+**Finding the right starting `bytesid`** — the date-ranged query this is derived from:
+
+```sql
+SELECT min(bytesid), max(bytesid), count(*)
+FROM public.blobbytes
+WHERE createdts > '2026-09-07';
+```
+
+**Measured 2026-09-13: a few seconds, on the unindexed table.** Project only
+`bytesid`/`createdts`/`filename` — never `SELECT *`. The same date filter written as
+`SELECT *` took **over two minutes** to return 327 rows, and that entire difference is
+detoasting and shipping 327 `bytea` payloads through the tunnel, not finding the rows. The
+main `blobbytes` heap is narrow because the payloads live in TOAST, so the sequential scan
+that locates the rows is cheap.
+
+This retired a planned index before it was applied: `dbpatch_beta100.sql` originally carried
+`CREATE INDEX CONCURRENTLY … ON public.blobbytes (createdts)` and is now an empty reserved
+shell. The index would have added per-insert maintenance on the largest table in the database
+to fix a cost that was never in the scan. **The lesson is the generalisable part:** when a
+query over a TOASTed table is slow, measure the projection before reaching for an index.
+
+### Four correctness details the first sketch of this got wrong
+
+Recorded because each one fails quietly rather than loudly:
+
+1. **Off-by-one in the filename.** The original copied `bytesid > LAST_ID` but labelled the
+   file `${LAST_ID}-${NEW_MAX}`, so the name claimed a row the file didn't contain. The
+   implemented mode is inclusive on both ends and the label matches exactly.
+2. **The state file advanced even when the copy failed.** `echo "${NEW_MAX}" > "${STATE_FILE}"`
+   ran unconditionally after the `\copy`, with no `ON_ERROR_STOP=1` — a failed copy still moved
+   the mark past rows that were never written, and nothing would ever go back for them. The
+   implemented mode sets `ON_ERROR_STOP=1`, writes to `.part`, and renames only on success, so
+   a half-written range never looks like a finished one.
+3. **No zero-row guard.** With no new rows, the original produced an empty file named for an
+   empty range. The implemented mode compares against `max(bytesid)` first and exits cleanly.
+4. **`\copy` must be on one physical line.** psql terminates a backslash command at the
+   newline, so the sketch's pretty multi-line `\copy (…)` is not a form psql accepts. The
+   implemented version keeps the whole statement on one line.
+
+**One hazard that remains, by design:** `bytesid` comes from a sequence, and a transaction can
+hold an assigned `bytesid` and commit *after* the snapshot this run reads. Starting the next
+run at `max + 1` can therefore skip it. Start the next run slightly **below** the previous
+`to` value and let the restore de-duplicate (see below) — overlap is cheap, a gap is permanent.
+
+### Replaying increments on restore: `restore-blob-increments.sh`
+
+A restore is no longer one `pg_restore` — it is the baseline archive **plus every incremental
+`.copy` since, applied in `bytesid` order**. Two things make that harder than it sounds.
+
+**Why a direct `\copy` into `blobbytes` cannot work.** `blobbytes` has
+`blobbytes_pk PRIMARY KEY (bytesid)`, and a binary `\copy … FROM` runs as a single
+transaction. One duplicate `bytesid` raises a unique violation, the transaction rolls back,
+and **nothing from that file lands** — not the duplicates, not the genuinely new rows either.
+It is all-or-nothing, so a single overlapping row poisons an entire increment.
+
+That collides head-on with the sequence hazard above, where deliberate overlap is the only
+defence against a permanent gap. So the restore has to absorb overlap rather than choke on it.
+
+**The two-step load.** `restore-blob-increments.sh <target_db> [dump_dir]` loads each file
+into an unlogged staging table with **no constraints**, then moves rows across:
+
+```sql
+TRUNCATE blobbytes_stg;
+\copy blobbytes_stg FROM '…/blobbytes_incr_20260913_65001-65328.copy' WITH (FORMAT binary)
+
+INSERT INTO public.blobbytes
+       (bytesid, createdts, blob, uploadedby_userid, filename, bobsource_sourceid)
+SELECT  bytesid, createdts, blob, uploadedby_userid, filename, bobsource_sourceid
+FROM    blobbytes_stg
+ON CONFLICT (bytesid) DO NOTHING;
+```
+
+Staging has no primary key, so the load always succeeds. The `INSERT … SELECT` is where the
+constraint applies, and `ON CONFLICT DO NOTHING` drops re-covered boundary rows per-row
+instead of aborting the file.
+
+**The staging table is not permanent.** The script creates it at the start of a run and drops
+it at the end; it exists only inside whichever target database is being restored into, and
+never in production. `UNLOGGED` because the contents are disposable — that skips WAL entirely,
+which matters at blob volumes. Peak disk cost is bounded by the **largest single increment**,
+not the length of the chain, because staging is truncated between files. The one case where it
+survives a run is deliberate: an aborted integrity check leaves it populated for inspection.
+
+**Conflicts are counted, not swallowed.** `ON CONFLICT DO NOTHING` would also silently discard
+a row whose `bytesid` matches but whose *content differs* — which on a provably insert-only
+table means a corrupt file, a reused sequence value, or a mismatched baseline. The script
+checks for exactly that before each insert and **aborts the run** if it finds any:
+
+```sql
+SELECT count(*)
+FROM blobbytes_stg s
+JOIN public.blobbytes b USING (bytesid)
+WHERE md5(s.blob) IS DISTINCT FROM md5(b.blob);
+```
+
+Per file it reports `staged` / `inserted` / `already-present`, and at the end re-runs the
+whole-table content checksum for comparison against production and against each increment's
+`.meta` sidecar.
+
+**Two footguns the script handles that a hand-rolled loop would not:**
+
+- **Ordering is numeric, not lexical.** `blobbytes_incr_…_9000-9100.copy` must be applied
+  before `…_10000-10100.copy`; a plain shell glob sorts it the other way round.
+- **Column order is load-bearing.** Binary COPY files carry **no column names** — the format
+  is positional and matched by type OID. The staging table's column list must stay in lockstep
+  with the `\copy` in `cnfprodbak.sh`'s incremental mode, or the load fails with an unhelpful
+  type error. Both sides carry a comment saying so.
+
+It also refuses to run against the production database name unless `ALLOW_PROD_TARGET=1` is
+set. It is the only script in this set that writes anything; every other one is read-only
+against production, and that asymmetry is worth a guard.
 
 ### What this doesn't solve, and the mitigation
 
@@ -715,18 +865,26 @@ bandwidth cap.
   cheap insurance against the incremental chain silently drifting if that ever changes.
 - **Restore complexity increases.** A restore is no longer "one `pg_restore`" — it's the last
   full baseline **plus every incremental `.copy` file since, applied in `bytesid` order**.
-  Update the Level 2 restore drill (above) to actually exercise this chain, not just the
-  baseline, or the drill isn't testing what will really happen in an incident.
+  `restore-blob-increments.sh` automates the replay, but the Level 2 restore drill still needs
+  extending to exercise the whole chain rather than just the baseline, or the drill isn't
+  testing what will really happen in an incident.
+- **Weekly volume.** A typical week's delta is however many photos/documents were uploaded that
+  week — a few hundred MB at most for a single-municipality deployment, not 163 GB. That
+  actually fits in a bandwidth cap, which is the entire point of the exercise.
 - **This is a Layer 3 (local drive) problem specifically.** WAL-G (Layer 2, not yet
   implemented) already solves incremental blob backup at the physical/WAL level — every WAL
   segment ships continuously regardless of table size, and `WALG_DELTA_MAX_STEPS` gives
   page-level delta base backups. Once Layer 2 is live, it carries the tight-RPO burden for
   blobs; Layer 3's job is an offline, offsite copy that's fine to be a week stale by design —
-  it just shouldn't cost 150 GB of bandwidth to stay a week stale.
+  it just shouldn't cost 163 GB of bandwidth to stay a week stale.
 
 ### Open items
 
-- [ ] Add an `incremental` (or similar) mode to `cnfprodbak.sh` implementing the above
+- [x] Add an `incremental` mode to `cnfprodbak.sh` — implemented 2026-09-13, manual `<bytesid>` argument
+- [x] Build the ON CONFLICT staging restore path — `restore-blob-increments.sh`, 2026-09-13
+- [x] Decide whether `blobbytes.createdts` needs an index — **no**, measured 2026-09-13; `dbpatch_beta100.sql` emptied
+- [ ] **Run the incremental once against prod** — never executed; keep the weekly full `blobs` run until it has been
+- [ ] **Run the replay once** — `restore-blob-increments.sh` has never executed either; both halves are untested
 - [ ] Decide the re-baseline cadence (quarterly proposed, unconfirmed)
 - [ ] Extend the Level 2 restore drill to replay the incremental chain, not just the baseline
 
@@ -946,7 +1104,7 @@ set -euo pipefail
 #   YYYYMMDD - dump date to verify; defaults to today.
 # Requires: local Postgres role "sylvia" with CREATEDB (see one-time setup above).
 
-LOCAL_MOUNT="/mnt/cnfpg_backup"
+LOCAL_MOUNT="/mnt/cnfpg_backup/dumps"
 DATE="${1:-$(date +%Y%m%d)}"
 DUMP_PATH="${LOCAL_MOUNT}/structural_${DATE}"
 VERIFY_DB="cnf_verify_${DATE}"
@@ -969,19 +1127,22 @@ createdb -U "${PGUSER}" "${VERIFY_DB}"
 # machine at all), that's worth stopping the run over, not silently ignoring.
 sudo -u postgres psql -d "${VERIFY_DB}" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
-# Restore the structural dump into the scratch database. No --no-owner/--no-privileges
-# needed: connecting as sylvia matches production ownership, so OWNER TO/GRANT
-# statements in the archive succeed as-is instead of erroring and being skipped.
+# Restore the structural dump into the scratch database. No --no-owner needed:
+# connecting as sylvia matches production ownership, so OWNER TO statements in
+# the archive succeed as-is instead of erroring and being skipped. --no-privileges
+# IS needed though: the archive's GRANT statements reference prod's read-only
+# roles (projectjay, jsettel, saylords, ...) which don't exist on this local
+# scratch cluster and would otherwise error on every table granted to them.
 #
 # `|| true`: pg_restore already continues past individual statement errors
-# (e.g. GRANTs to production-only roles that don't exist locally) by design —
-# without `|| true` here, its own nonzero exit code trips `set -e` and kills
-# this script immediately afterward, before the spot-check below ever runs.
+# by design — without `|| true` here, its own nonzero exit code trips `set -e`
+# and kills this script immediately afterward, before the spot-check below ever runs.
 pg_restore \
   -U "${PGUSER}" \
   -d "${VERIFY_DB}" \
   -Fd \
   -j 4 \
+  --no-privileges \
   "${DUMP_PATH}" || true
 # -U: PostgreSQL role to connect as.
 # -d: target database; must already exist (createdb above), pg_restore does not create it.
@@ -1017,14 +1178,14 @@ A row-count spot-check (as above) doesn't prove much for a single binary-blob co
 #!/usr/bin/env bash
 set -euo pipefail
 
-# verify-blobs-restore.sh — Level 2 spot restore verification for the blobs dump.
+# verify-blob-restore.sh — Level 2 spot restore verification for the blobs dump.
 # Run on tangoonefour (local machine with a PostgreSQL server installed).
 # Restores blobbytes data into a scratch database, then runs a content
 # checksum (not just a row count) to prove the bytea payloads themselves
 # restored correctly. Does NOT drop the scratch database automatically —
 # inspect it, then drop it yourself (command printed at the end of the run).
 #
-# Usage: ./verify-blobs-restore.sh [YYYYMMDD] [EXISTING_DB]
+# Usage: ./verify-blob-restore.sh [YYYYMMDD] [EXISTING_DB]
 #   YYYYMMDD    - dump date to verify; defaults to today. Also selects which
 #                 dated structural dump blobbytes' schema is pulled from, if
 #                 EXISTING_DB is omitted.
@@ -1034,7 +1195,7 @@ set -euo pipefail
 # Requires: local Postgres role "sylvia" with CREATEDB (see
 # verify-structural-restore.sh's one-time setup).
 
-LOCAL_MOUNT="/mnt/cnfpg_backup"
+LOCAL_MOUNT="/mnt/cnfpg_backup/dumps"
 DATE="${1:-$(date +%Y%m%d)}"
 EXISTING_DB="${2:-}"
 BLOBS_DUMP_PATH="${LOCAL_MOUNT}/blobs_${DATE}"
@@ -1060,11 +1221,17 @@ else
   fi
   VERIFY_DB="cnf_verify_blobs_${DATE}"
   createdb -U "${PGUSER}" "${VERIFY_DB}"
+  # Pre-create a stub sequence: bytesid's DEFAULT is nextval('...blobbytes_seq'::regclass),
+  # and that regclass cast resolves (i.e. requires the sequence to already exist) at
+  # CREATE TABLE time — even though the data restore below always supplies bytesid
+  # explicitly and nextval() is never actually called. An empty stub is sufficient.
+  psql -U "${PGUSER}" -d "${VERIFY_DB}" -c "CREATE SEQUENCE IF NOT EXISTS public.blobbytes_seq;"
   pg_restore \
     -U "${PGUSER}" \
     -d "${VERIFY_DB}" \
     -Fd \
     --schema-only \
+    --no-privileges \
     -t blobbytes \
     "${STRUCTURAL_DUMP_PATH}"
   # --schema-only -t blobbytes: pulls just this one table's definition (plus
@@ -1072,6 +1239,9 @@ else
   # tables, since blobs are being tested in isolation here. This does NOT
   # pull in pdfdoc/photodoc's incoming FKs to blobbytes — expected and fine,
   # since those tables aren't part of this check.
+  # --no-privileges: skips the archive's GRANT statements, which reference
+  # prod's read-only roles (projectjay, jsettel, saylords) that don't exist
+  # on this local scratch cluster and aren't needed for a data checksum.
 fi
 
 # Restore the blob data. Same `|| true` reasoning as the structural script:
@@ -1099,6 +1269,42 @@ echo "Compare the content_checksum above against the same query run on productio
 echo "Scratch database ${VERIFY_DB} was left in place for manual inspection."
 echo "Drop it yourself when done: dropdb -U ${PGUSER} ${VERIFY_DB}"
 ```
+
+**Confirmed 2026-09-09 — `blobbytes_seq` doesn't exist footgun:** first real run of this script
+failed on the `--schema-only -t blobbytes` restore: `ERROR: relation "public.blobbytes_seq" does
+not exist`, cascading into two more errors (`ALTER TABLE ... OWNER TO sylvia` and both `GRANT`
+statements also failed, since the table was never created). Root cause: `bytesid`'s `DEFAULT
+nextval('public.blobbytes_seq'::regclass)` clause resolves that regclass cast — i.e. requires the
+sequence to already exist — the moment `CREATE TABLE` executes, even though it's never actually
+*called*: the data restore that follows always supplies `bytesid` explicitly from the dump, never
+relying on `nextval()` to generate a fresh value. `pg_dump -t blobbytes` doesn't pull in
+`blobbytes_seq`'s own `CREATE SEQUENCE` statement when filtering to a single table this way, so
+the fix is the same "pre-create the missing dependency" pattern as the postgis pre-install in
+`verify-structural-restore.sh` above — an empty stub sequence satisfies the regclass resolution
+without needing to generate any real values: `CREATE SEQUENCE IF NOT EXISTS
+public.blobbytes_seq;`, run once before the `--schema-only` restore call.
+
+Next run past that fix hit a second footgun: `ERROR: role "projectjay" does not exist` on the
+archive's `GRANT SELECT ON TABLE public.blobbytes TO projectjay;` (and two more GRANTs to
+`jsettel`/`saylords`) — these are prod's read-only user roles, which don't exist on the local
+scratch cluster and don't need to for a data checksum. Fixed with `--no-privileges` on the
+`--schema-only` restore, so the archive's GRANT statements are skipped instead of erroring.
+
+**Watching progress during the data restore:** the blob data load below is a single `COPY ...
+FROM stdin` for the whole table — a bulk `COPY` runs as one implicit transaction, so no rows are
+visible to any other session (including a `SELECT count(*)` from pgAdmin) until it commits at the
+very end. Minutes of silence with zero visible rows is expected, not a hang. To watch real
+progress without waiting for completion, query from a second session:
+
+```sql
+SELECT p.pid, p.bytes_processed, p.bytes_total, p.tuples_processed, a.state
+FROM pg_stat_progress_copy p
+JOIN pg_stat_activity a ON a.pid = p.pid;
+```
+
+`bytes_processed`/`tuples_processed` climbing confirms it's actively writing. `-j 4` on the data
+restore below doesn't help here either — there's only one table, so parallel workers have
+nothing to split across.
 
 **Production-side comparison** — run the identical query over the same tunnel used for dumps, and diff `content_checksum` against what the script above printed. A match is byte-for-byte proof the blob backup is restorable, not just "some rows landed":
 
@@ -1148,6 +1354,7 @@ The exFAT partition for code officer photos is a separate question with differen
 | Manifest check (automated) | After every transfer | `pg_restore --list` on both dumps |
 | Structural spot restore | Monthly | `createdb`, `pg_restore`, row count check, `dropdb` |
 | Blob spot restore + checksum | Monthly | `pg_restore` (schema pulled from structural if needed), content-checksum query vs. production, `dropdb` |
+| Incremental chain replay | Monthly, after the blob restore | `restore-blob-increments.sh` against the just-restored scratch DB; check per-file `inserted`/`already-present` counts and the final checksum vs. production |
 | Full WAL-G restore drill | Annually minimum | Spin up a temporary DO droplet, restore from B2, verify data, document RTO achieved, tear down |
 | DO snapshot restore test | Annually | Restore from DO snapshot to a temporary droplet, verify PostgreSQL starts cleanly |
 
@@ -1184,9 +1391,19 @@ Several items raised during architecture discussions that have non-technical imp
 | 2026-09-07 | `rsync --checksum` on all transfers | MD5 hash comparison detects silent corruption that size+mtime check misses | Adopted |
 | 2026-09-07 | B2 application key scoped to single bucket | Blast radius reduction if VPS credentials are compromised | Pending implementation |
 | 2026-09-07 | Single `cnfprodbak.sh` script with a structural/blobs mode flag, not two scripts | Both modes share the tunnel check, connection vars, and `BACKUP_ROOT`; matches how the pair is actually operated | Adopted |
-| 2026-09-07 | Gitignore the real dump script; commit a `.sh.template` twin | Script embeds the real `sylvia` role name and local backup paths — unnecessary recon value if pushed; matches the existing `codenforce.properties`/`.template` convention | Adopted |
+| 2026-09-07 | Gitignore the real dump script; commit a `.sh.template` twin | Script embeds the real `sylvia` role name and local backup paths — unnecessary recon value if pushed; matches the existing `codenforce.properties`/`.template` convention | **Decided 2026-09-07, not actually executed until 2026-09-13** — the real script was committed verbatim in the interim (never pushed) |
 | 2026-09-07 | `sylvia` role (SELECT-only), not `postgres`, for dump connections | Least privilege — the dump doesn't need superuser | Adopted |
-| 2026-09-07 | High-water-mark (`bytesid`) incremental blob extract via `\copy`, not `pg_dump` | `pg_dump` has no row-filter flag; `blobbytes` verified insert-only in practice (`updateBlobBytes`/`deleteBytes` are dead code) | Proposed, not yet implemented |
+| 2026-09-07 | High-water-mark (`bytesid`) incremental blob extract via `\copy`, not `pg_dump` | `pg_dump` has no row-filter flag; `blobbytes` verified insert-only in practice (`updateBlobBytes`/`deleteBytes` are dead code) | Adopted; implemented 2026-09-13 |
+| 2026-09-13 | Incremental start point is a **command-line argument**, not a persisted state file | A state file advances silently past rows a failed run never wrote; an explicit number keeps the decision visible and makes deliberate overlap easy | Adopted |
+| 2026-09-13 | Incremental range is **inclusive** of the supplied `bytesid` | Matches how the number is actually obtained (read a `bytesid` off a query, back up that row and everything after it) and makes the filename label exact | Adopted |
+| 2026-09-13 | Deliberate overlap between runs + `ON CONFLICT (bytesid) DO NOTHING` on restore | A sequence value can commit after a run's snapshot; overlap is cheap, a gap is permanent | Adopted; restore side implemented 2026-09-13 (`restore-blob-increments.sh`) |
+| 2026-09-13 | Staging table is **ephemeral and unlogged**, created and dropped per replay run | Contents are disposable, so skipping WAL is free speed; nothing permanent is added to the schema, and peak disk is bounded by the largest single increment | Adopted |
+| 2026-09-13 | Replay **aborts** on a same-`bytesid`-different-content row rather than skipping it | `DO NOTHING` would silently swallow the one case that actually indicates corruption or a mismatched baseline | Adopted |
+| 2026-09-13 | `ALLOW_PROD_TARGET=1` guard on the only script that writes | Every other script in the set is read-only against prod; the asymmetry deserves an explicit gate | Adopted |
+| 2026-09-13 | **No** index on `blobbytes.createdts` — `dbpatch_beta100.sql` emptied | Measured: the projection-only scoping query returns in seconds unindexed. The 2-minute `SELECT *` was detoasting and shipping 327 `bytea` payloads, not scanning. An index would cost insert maintenance on the largest table for no measurable gain | **Reverted before application** |
+| 2026-09-13 | A committed `.template` twin for **every** script in `database/scripts/`, real copies kept outside the repo | `git clean -xdf` deletes ignored files, so an in-tree ignored path risks destroying the only working copy; the scripts are workstation artifacts regardless | Adopted |
+| 2026-09-13 | Backup script **checks** for the tunnel and exits; it never starts one | Auto-launching `ssh` surfaced a key-passphrase prompt mid-backup; the only credential a run should ask for is the database role's. Starting the tunnel is a deliberate operator act | Adopted |
+| 2026-09-13 | Probe `127.0.0.1:PORT` via bash `/dev/tcp`, not `nc -z localhost` | `localhost` resolves to `::1` first here, so an IPv4-bound tunnel probed as dead; `/dev/tcp` also drops the external `nc` dependency whose absence `2>/dev/null` was hiding | Adopted |
 
 ---
 
@@ -1197,9 +1414,15 @@ The following items are unresolved and represent implementation or decision debt
 - [ ] **WAL-G installation and configuration** on the production VPS — see `wal-g-setup.md` (forthcoming)
 - [ ] **B2 bucket creation and application key scoping** — bucket, key ID, and app key generation in B2 console; Object Lock configuration for immutability
 - [ ] **Monitoring for `pg_stat_archiver.failed_count`** — alerting mechanism not yet defined; WAL storm risk is unmitigated until this is in place
-- [x] **`cnfprodbak.sh` wrapper script** — structural + blobs modes; first structural run succeeded (76 MB), blob run in progress (150+ GB) as of 2026-09-07
-- [x] **Level 1 manifest verification** — `pg_restore --list` against the structural dump passed 2026-09-07 (full, valid TOC); blobs dump not yet checked (still running)
-- [ ] **Incremental blob backup** — design proposed above (high-water-mark `\copy`); not yet implemented as a script mode
+- [x] **`cnfprodbak.sh` wrapper script** — structural + blobs modes; structural run succeeded (78 MB), blobs baseline completed 2026-09-07 at 163 GB
+- [x] **Level 1 manifest verification** — `pg_restore --list` against the structural dump passed 2026-09-07 (full, valid TOC); blobs dump not yet checked
+- [x] **Incremental blob backup mode** — `cnfprodbak.sh incremental <bytesid>`, implemented 2026-09-13
+- [x] **De-duplicating replay path** — `restore-blob-increments.sh` (unlogged staging + `ON CONFLICT DO NOTHING`), 2026-09-13
+- [x] **`.template` twin for every script** in `database/scripts/`, 2026-09-13
+- [x] **`blobbytes.createdts` index** — evaluated and **rejected** on measurement; `dbpatch_beta100.sql` left as an empty reserved shell
+- [ ] **First incremental run against prod** — never executed; keep taking the weekly full `blobs` dump until it has been
+- [ ] **First replay run** — `restore-blob-increments.sh` has never executed; until both halves run once, the incremental chain is untested in both directions
+- [ ] **Move the scripts off `sylvia` onto a read-only role** — `sylvia` owns every object, so today's "SELECT-only" dump connection actually carries DROP/ALTER authority over the whole schema. Recipe: [postgres-user-admin-guide](/dev/subsystems/db/postgres-user-admin-guide) §2 (`pg_read_all_data`, available on PG14). One-line change per script once the role exists
 - [ ] **Automated weekly dump and cron** — manual procedure above; not yet scripted and scheduled
 - [ ] **LUKS encryption** on the XFS partition of the WD drive
 - [ ] **Formal RPO/RTO negotiation with TCVCOG** — current targets are working baselines, not documented commitments

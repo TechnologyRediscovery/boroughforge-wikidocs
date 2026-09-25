@@ -16,6 +16,49 @@ This is a procedural runbook. Read it before you need it — not for the first t
 
 **Read the decision tree first. Execute the scenario that matches.**
 
+> ### ⚠ `$PGDATA` is currently NOT `/var/lib/postgresql/18/main`
+>
+> Every `PGDATA` path printed in this runbook is the packaged default. On the production host
+> today the PG18 cluster lives on a DigitalOcean block volume:
+>
+> ```
+> /mnt/vol_pg18data/pgdata/18/main
+> ```
+>
+> **Substitute that path wherever this document says `/var/lib/postgresql/18/main`** — with one
+> exception: Scenario C and the full-VPS rebuild construct a *new* host, where the packaged
+> default is correct and the volume may not exist at all.
+>
+> Do not restore from memory. Take two seconds first:
+>
+> ```bash
+> pg_lsclusters          # the 'Data directory' column is authoritative
+> ```
+>
+> This is a temporary state — the cluster moves back to local disk after the PG18 soak period,
+> at which point this callout should be deleted rather than edited.
+
+> ### ⚠ WAL-G is configured by a YAML file now, not `/etc/wal-g.env`
+>
+> Every WAL-G command below still uses the superseded form:
+>
+> ```bash
+> sudo -u postgres bash -c 'set -a; source /etc/wal-g.env; set +a
+>   wal-g <command>'
+> ```
+>
+> **`/etc/wal-g.env` does not exist.** Configuration lives in `/etc/wal-g/wal-g.yaml` and is passed
+> explicitly. The substitution is mechanical — drop the `bash -c` sourcing wrapper entirely and add
+> `--config`:
+>
+> ```bash
+> sudo -u postgres wal-g --config /etc/wal-g/wal-g.yaml <command>
+> ```
+>
+> `--config` is a global flag, so it goes **before** the subcommand. See `wal-g-setup.md` §2.3–2.4
+> for why. **This document has not yet been swept**; the conversion is tracked in the `codenforce`
+> repo as F13 and must land before the first restore drill.
+
 ---
 
 ## Severity and notification
@@ -455,7 +498,7 @@ grep -i "error\|fatal" /tmp/structural_restore.log
 ### B4: Restore the blob dump
 
 ```bash
-# Restore blobbytes data. This is the large component (~190GB).
+# Restore blobbbytes data. This is the large component (~190GB).
 pg_restore \
   -U postgres \
   -d cogdb \
@@ -465,7 +508,7 @@ pg_restore \
   --no-owner \
   --no-privileges \
   --data-only \
-  # --data-only: the structural dump already created the blobbytes table.
+  # --data-only: the structural dump already created the blobbbytes table.
   # This restores only the row data, not the CREATE TABLE statement.
   # Without --data-only, pg_restore would attempt to create the table again
   # and fail with "relation already exists".
@@ -647,7 +690,7 @@ sudo -u postgres bash -c '
 
 | Item | Value |
 |---|---|
-| Production PostgreSQL version | 17 |
+| Production PostgreSQL version | 18.6 (EOL ~November 2030) |
 | Production cluster name | main |
 | Production port | 5432 |
 | PGDATA | `/var/lib/postgresql/18/main` |
@@ -656,8 +699,8 @@ sudo -u postgres bash -c '
 | WAL-G binary | `/usr/local/bin/wal-g` |
 | WAL-G logs | `/var/log/wal-g/` |
 | PostgreSQL log | `/var/log/postgresql/postgresql-18-main.log` |
-| WD Elements XFS mount | `/mnt/pg_backup` |
-| WD Elements exFAT mount | `/mnt/code_officer_photos` |
+| WD Elements XFS mount | `/mnt/cnfpg_backup` (label: cnfadmin) |
+| WD Elements exFAT mount | `/mnt/cnfwinstorage` (label: WinCompat) |
 | B2 bucket | `cnf-wal-archive` |
 | B2 WAL prefix | `s3://cnf-wal-archive/cogdb` |
 | Production database | `cogdb` |
@@ -673,5 +716,5 @@ sudo -u postgres bash -c '
 **Revision trigger conditions:** This runbook must be reviewed and updated after:
 - Any actual restore event (update with lessons learned)
 - Any change to the backup architecture (new tools, changed paths, new B2 bucket)
-- The PostgreSQL major version upgrade (paths change from 17 to whatever comes next)
+- The PostgreSQL major version upgrade (paths change from 18 to whatever comes next; PG19 is currently in beta)
 - Annually as a scheduled review, even if no incidents occurred
