@@ -24,6 +24,8 @@ municipality running day-to-day.
 
 ## By subsystem
 
+- [CEAR (Code Enforcement Action Requests)](/admin/subsystems/cear/overview) — configuring
+  routing and update-blast email notifications, including the officer-notice guarantee.
 - [Letters & Emailing](/admin/subsystems/letters/overview) — template setup, print formats,
   and generic officer signatures.
 - [Data Exchange (Westmoreland County)](/admin/westmc-data-exchange) — reviewing, enabling,

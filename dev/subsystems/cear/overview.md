@@ -2,7 +2,7 @@
 title: Code Enforcement Action Requests (CEAR) — Developer Notes
 description: How CEARs are submitted, routed by officers, and notified about via email.
 published: true
-date: 2026-09-28T00:00:00.000Z
+date: 2026-09-30T00:00:00.000Z
 tags: subsystem:cear, audience:dev, type:overview
 editor: markdown
 dateCreated: 2026-08-07T00:00:00.000Z
@@ -14,9 +14,11 @@ A **Code Enforcement Action Request (CEAR)** is a complaint or municipal concern
 the CE office, either by the public (unauthenticated) or by staff on a caller's behalf. Once
 submitted, officers route each CEAR through a 3-step modal flow (property confirm → route
 selection → execute) that either attaches it to a code enforcement case/occupancy period or
-closes it out (invalid request, no violation found, muni-general action complete). Every stage
-is wired to an email-notification layer (`CommunicationCoordinator`) covering both staff
-subscribers and, increasingly, the original public/internal submitter.
+closes it out (invalid request, referred to another department, muni-general action complete).
+Every stage is wired to an email-notification layer (`CommunicationCoordinator`) covering both
+staff subscribers and the original public/internal submitter — gated, as of a 2026-09-30
+ratified invariant, behind a mandatory one-click-skippable officer notice before any Phase-12
+blast dispatch.
 
 ## Current architecture
 

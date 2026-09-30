@@ -14,7 +14,7 @@ Guidance for members of the public submitting requests or applications to a muni
 using CodeNforce — no login required.
 
 - Code Enforcement Action Requests (CEAR) — submitting a request and checking its status.
-  See the [cear subsystem hub](/system/subsystems/cear) (public page not yet written).
+  See the [CEAR public guide](/public/subsystems/cear/overview).
 - Public applications — rental registration, permit, inspection, and zoning applications.
   See the [public-applications subsystem hub](/system/subsystems/public-applications)
   (public page not yet written).

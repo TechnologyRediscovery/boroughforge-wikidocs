@@ -16,9 +16,11 @@ dateCreated: 2026-09-28T00:00:00.000Z
 > current in-flight feature index.
 
 _Reflects `CEARInternalSubmitBB`, `CEActionRequestsBB`, `CaseCoordinator`,
-`CEARProcessingRouteEnum`, and `CommunicationCoordinator` as of April 2026, **except section 6
-(Email Notification System), which is current as of 2026-09-28** — see the codenforce dev index
-for anything that has changed since._
+`CEARProcessingRouteEnum`, and `CommunicationCoordinator` as of April 2026, **except section 3
+(Routing), section 4 (Status Lifecycle), and section 6 (Email Notification System), which are
+current as of 2026-09-30** (the CEAR-A through CEAR-J batch — see the codenforce dev index at
+`docs/subsystems/cear/cear-index.md` for the full per-item history) — check the codenforce dev
+index for anything that has changed since._
 
 ---
 
@@ -107,12 +109,34 @@ Called at every routing-state change. Builds `processingRouteList` based on requ
 
 | Request type condition | Routes offered |
 |---|---|
-| `isMuniGeneral()` | `MUNI_GENERAL_ACTION_UNDERWAY`, `MUNI_GENERAL_ACTION_COMPLETED`, `INVALID_REQUEST` |
-| `isNotAtKnownAddress()` | `INVALID_REQUEST`, `NO_VIOLATION_FOUND` |
-| Standard (property-linked) — property **has** existing CE cases | `ATTACH_TO_EXISTING_CASE`, `ATTACH_TO_NEW_CASE`, `ATTACH_TO_OCC_PERIOD`, `INVALID_REQUEST`, `NO_VIOLATION_FOUND` |
-| Standard (property-linked) — property **has no** CE cases yet | `ATTACH_TO_NEW_CASE`, `ATTACH_TO_OCC_PERIOD`, `INVALID_REQUEST`, `NO_VIOLATION_FOUND` |
+| `isMuniGeneral()` | `MUNI_GENERAL_ACTION_UNDERWAY`, `MUNI_GENERAL_ACTION_COMPLETED`, `INVALID_REQUEST`, `REFERRED_TO_OTHER_DEPARTMENT` |
+| `isNotAtKnownAddress()` | `INVALID_REQUEST`, `REFERRED_TO_OTHER_DEPARTMENT` |
+| Standard (property-linked) — property **has** existing CE cases | `ATTACH_TO_EXISTING_CASE`, `ATTACH_TO_NEW_CASE`, `ATTACH_TO_OCC_PERIOD`, `INVALID_REQUEST`, `REFERRED_TO_OTHER_DEPARTMENT` |
+| Standard (property-linked) — property **has no** CE cases yet | `ATTACH_TO_NEW_CASE`, `ATTACH_TO_OCC_PERIOD`, `INVALID_REQUEST`, `REFERRED_TO_OTHER_DEPARTMENT` |
 
 `ATTACH_TO_EXISTING_CASE` is omitted when `selectedRequestPropertyDH.getCeCaseList()` is null or empty, preventing the officer from reaching step 3 only to find an empty table.
+
+> **Retired from new routing 2026-09-30 (CEAR-F): `NO_VIOLATION_FOUND`.** The enum constant,
+> its DB status row, and the `UNPROCESSED` re-route escape hatch for CEARs already sitting in
+> this status are all untouched — this is a soft deactivation at the route-*offering* layer
+> only (`CEARProcessingRouteEnum` is a Java enum, not a DB-backed lookup table, so there is no
+> row to flag `deactivatedts` on). The constant carries `@Deprecated` plus a Javadoc pointer to
+> this decision. Rationale: a genuine "no violation found" determination is a code-enforcement
+> finding and now requires a real CE case with a logged inspection
+> (`ATTACH_TO_NEW_CASE`/`ATTACH_TO_EXISTING_CASE`) rather than a one-click dashboard closeout.
+> Officers are routed into a case for anything short of literal junk (`INVALID_REQUEST`) or a
+> referral (`REFERRED_TO_OTHER_DEPARTMENT`).
+>
+> **Added 2026-09-30 (CEAR-C, tier 1): `REFERRED_TO_OTHER_DEPARTMENT`.** A plain terminal
+> "get this off my plate" route — free-text note, no case/property requirement, offered in
+> every branch above. It reuses the existing `CEAR_ROUTED` blast event (fires on every
+> terminal-route commit once a muni enables that event type) rather than needing its own event
+> type. A **tier 2** enhancement (officer picks a specific staff person with a valid UMAP —
+> "MuniStaff rank or above" is being revisited to also allow read-only accounts — to receive
+> the full CEAR confirmation email as a new-task notification, via
+> `CEARUpdateBlastContext.overrideToAddress`, alongside — not instead of — the normal update
+> blast) is spec'd but still `PLANNING`; see the codenforce dev index's CEAR-C doc and
+> `cearbacklog.md`.
 
 After the type-based list is built, the method resolves the **current route** (`resolveCurrentRoute()`) by scanning all enum values for the one whose DB status key matches the current `requestStatus.statusID`. It then checks `isTerminal()` on that route:
 
@@ -121,8 +145,20 @@ After the type-based list is built, the method resolves the **current route** (`
 
 ### 3.2 Step 1 — Property
 
-> **Muni-general requests skip this step entirely.**
-> `onCEARProcessingInit` checks `selectedRequest.isMuniGeneral()` first: if true, it calls `evaulateSelectedRequestRoutingStatusAndUpdateRouteList()` and sets `cearFlowActiveStep = 2` directly, so the dialog opens at the route-selection screen without ever rendering step 1.
+> **Changed 2026-09-30 (CEAR-H-3): muni-general requests no longer skip this step.** The
+> earlier behavior (`onCEARProcessingInit` special-casing `selectedRequest.isMuniGeneral()` to
+> jump straight to `cearFlowActiveStep = 2`) left an officer with no way to search for and
+> attach a real property to a muni-general concern that turned out to have one (e.g. a
+> "streetlights are out downtown" report that's actually traceable to one parcel). Every
+> request type — including muni-general — now always starts at step 1. A muni-general request
+> with genuinely no property gets a dedicated **"This is a general request (no property),
+> proceed to routing"** confirm button (rendered only when `empty requestProperty and
+> muniGeneral`) alongside the normal property-search box, wired to the same
+> `onCEARFlowPropertyConfirm` listener. If an officer instead searches for and attaches a real
+> property to a muni-general CEAR here, `CaseCoordinator.cear_updateCEARProperty()` now also
+> flips `muniGeneral` back to `false` (mirroring its existing `notAtKnownAddress` toggle-off),
+> so the request routes as standard/property-based going forward instead of being stuck
+> offering only the muni-general routes.
 
 For all other request types, step 1 displays the currently linked property address (or "No property linked").
 
@@ -193,13 +229,36 @@ Each route renders its own `f:subview`:
   - Appends public note; writes to DB; flushes cache.
 
 #### INVALID_REQUEST
+
+> **Changed 2026-09-30 (CEAR-E): requires a real description + two-step confirm.** Officers
+> were misusing this route for genuine code-enforcement determinations instead of literal form
+> junk (spam, gibberish, abusive text). `path3AttachInvalidMessage` now rejects a blank or
+> trivially short `invalidMessage` (minimum ~20 characters) both client-side (inline validation)
+> and, per this codebase's "UI check is never the real gate" rule, inside
+> `CaseCoordinator.cear_updateCEAR` itself as a route-specific audit guard (throws
+> `BObStatusException` if bypassed). A `p:confirmDialog`-based two-step confirm (BB Rule 6 —
+> never `onclick="return confirm(...)"`) asks the officer to affirm the request is genuinely
+> invalid junk, not a real determination, before committing. Applies identically whether reached
+> from a standard, not-at-known-address, or muni-general CEAR — no special-casing.
+
 - `path3AttachInvalidMessage(ev)`:
   - Appends officer's text to `publicExternalNotes` using message bundle header/explanation.
   - `cear_updateCEAR(..., INVALID_REQUEST)` → updates status, persists, flushes.
 
-#### NO_VIOLATION_FOUND
-- `path4AttachNoViolationFoundMessage(ev)`:
-  - Identical pattern to INVALID_REQUEST but uses different message bundle keys and `NO_VIOLATION_FOUND` route enum.
+#### NO_VIOLATION_FOUND (deprecated — legacy data only, see §3.1)
+
+- `path4AttachNoViolationFoundMessage(ev)` still exists and still works for re-routes, but the
+  route is no longer offered in `processingRouteList` for any new routing decision (§3.1).
+  Structurally identical to `path3AttachInvalidMessage` — free-text note, no confirmation step
+  — but a genuine "no violation" finding now belongs inside a real CE case instead.
+
+#### REFERRED_TO_OTHER_DEPARTMENT (added 2026-09-30, CEAR-C tier 1)
+
+- New `path6ReferToOtherDepartment(ev)` method, mirroring `path3AttachInvalidMessage`: a
+  free-text note (which department, and why), `cear_updateCEAR(..., REFERRED_TO_OTHER_DEPARTMENT)`,
+  then the normal `fireRoutingBlastIfEnabled()` / `CEAR_ROUTED` blast path — no special recipient
+  handling in tier 1. Offered for every request shape (standard, not-at-known-address, and
+  muni-general).
 
 #### MUNI_GENERAL_ACTION_UNDERWAY / MUNI_GENERAL_ACTION_COMPLETED
 
@@ -222,20 +281,24 @@ Rendered by `cear-flow-step3-munigeneral-sv` when `isCearFlowRouteMuniGeneral()`
 
 ## 4. Status Lifecycle
 
-All status transitions go through `cear_updateRequestStatus(cear, route)` (private, called by `cear_updateCEAR`), which reads the DB status ID from the resource bundle key stored in `CEARProcessingRouteEnum`.
+All status transitions go through `cear_updateRequestStatus(cear, route)` (now promoted onto
+`CaseCoordinator` per CEAR-D, called by `cear_updateCEAR`), which reads the DB status ID from
+the resource bundle key stored in `CEARProcessingRouteEnum`.
 
 ```
 [inserted] → UNPROCESSED (non-terminal)
               ↓
     ┌─────────────────────────────────────────────────────────────────────┐
-    │ Property-specific                                                   │
-    │  ATTACH_TO_EXISTING_CASE → status=existingCase  (terminal)         │
-    │  ATTACH_TO_NEW_CASE      → status=newCase        (terminal)         │
-    │  ATTACH_TO_OCC_PERIOD    → status=occPeriod      (terminal)         │
-    │  INVALID_REQUEST         → status=invalid        (terminal)         │
-    │  NO_VIOLATION_FOUND      → status=noViolation    (terminal)         │
+    │ Property-specific / not-at-known-address / muni-general             │
+    │  ATTACH_TO_EXISTING_CASE        → status=existingCase   (terminal)  │
+    │  ATTACH_TO_NEW_CASE             → status=newCase         (terminal) │
+    │  ATTACH_TO_OCC_PERIOD           → status=occPeriod       (terminal) │
+    │  INVALID_REQUEST                → status=invalid         (terminal)│
+    │  REFERRED_TO_OTHER_DEPARTMENT   → status=referredOtherDept(terminal)│
+    │  NO_VIOLATION_FOUND (deprecated, legacy data / re-route only)       │
+    │                                 → status=noViolation      (terminal)│
     ├─────────────────────────────────────────────────────────────────────┤
-    │ Muni-general                                                        │
+    │ Muni-general only                                                    │
     │  MUNI_GENERAL_ACTION_UNDERWAY  → status=muniGenUnderway (non-term.) │
     │  MUNI_GENERAL_ACTION_COMPLETED → status=muniGenCompleted (terminal) │
     └─────────────────────────────────────────────────────────────────────┘
@@ -246,12 +309,25 @@ All status transitions go through `cear_updateRequestStatus(cear, route)` (priva
     keep the "Process this request" button visible without a reset option.
 ```
 
-> **Ground-truthed 2026-09-28** (see the codenforce dev index for the in-flight audit this fed):
-> `cear_updateRequestStatus` is a bare status-code write with **no automatic internal note** —
-> it does not record "status changed from X to Y" on its own. Each routing call site is
-> individually responsible for any note it appends (e.g. `path3AttachInvalidMessage` appends the
-> officer's own free-text message). A generic "this CEAR was re-routed" audit trail is not
-> guaranteed today outside of what each path happens to write.
+> **Ground-truthed 2026-09-28, fixed 2026-09-30 (CEAR-D).** `cear_updateRequestStatus` used to
+> be a bare status-code write with **no automatic internal note** and no single "when was this
+> CEAR last routed" timestamp — `caseAttachmentTimeStamp` only ever covered the two case/occ-
+> period attachment routes, never `INVALID_REQUEST`, `NO_VIOLATION_FOUND`,
+> `MUNI_GENERAL_ACTION_COMPLETED`, or `REFERRED_TO_OTHER_DEPARTMENT`. Fixed by:
+> - A new `routingcompletedts timestamp with time zone` column, stamped centrally inside
+>   `cear_updateRequestStatus()` whenever `route.isTerminal()` — covering every terminal route
+>   (including the two case/occ-period attachment routes, which keep setting
+>   `caseAttachmentTimeStamp` separately as before; the two columns answer different
+>   questions and are both kept). Never stamped on `UNPROCESSED` (non-terminal — that's the
+>   un-resolution, not a resolution).
+> - An automatic **re-route note**: if the CEAR's *current* route (resolved the same way
+>   `resolveCurrentRoute()` does, now promoted onto `CaseCoordinator`) was already terminal
+>   when a new terminal route commits, `cear_updateRequestStatus()` appends an internal note
+>   ("Re-routed from `{oldRoute}` to `{newRoute}` by `{officer}`.") automatically, instead of
+>   depending on each of the ~7 routing call sites to remember to do it themselves.
+> - `routingcompletedts` is exposed in the CEAR dashboard UI (the routed-date line on the CEAR
+>   card and the search table — see §7 of the codenforce dev index's CEAR-H doc) and is
+>   searchable via `SearchParamsCEActionRequestsDateFieldsEnum.ROUTINGCOMPLETED_TS`.
 
 ---
 
@@ -451,6 +527,39 @@ unauthenticated, idempotent public endpoint behind the unsubscribe link embedded
 footer — the token itself is the credential. Legacy blasts (§6.1) have no equivalent; they cannot
 be unsubscribed from short of disabling the muni-wide subscriber flag or the routing-blast
 checkbox.
+
+#### 6.2.6 Officer Notice Invariant (P1 — ratified 2026-09-30, CEAR-J)
+
+**No blast under this system may ever fire without the acting officer first seeing a
+one-click-skippable notice.** This is a hard product invariant, not a per-event-type setting —
+it applies identically whether the muni has that event type's blast enabled or disabled, and
+there is no admin override, permission, or role that bypasses it. Ratified after an internal
+review found the original Phase 12 design would have let a blast go out silently from a couple
+of case-lifecycle action buttons with no confirmation step at all.
+
+Mechanics:
+
+- A single composite component, `cearBlastNoticeCC` (`<tt:cearBlastNoticeCC .../>` — verify the
+  actual namespace alias in each host file before reuse), renders a small inline banner
+  immediately above the commit button for every action that can dispatch a Phase-12 blast: *"A
+  status update email may be sent to N recipient(s) for this action"* with a **"Don't send this
+  time"** one-click checkbox/toggle that maps straight to the `officerOptedOut` parameter on
+  `cecase_dispatchBlastIfConfigured` (§6.2.4) — opting out skips only *this one dispatch*, not
+  the muni's setting for the event type going forward.
+- The notice renders **unconditionally** once the host action is one of the 9
+  `CEARUpdateBlastEventTypeEnum` values, even when the muni currently has that specific event
+  type toggled off in `updateblastsettings` — so an officer is never surprised the other
+  direction either (toggling it on between page load and commit can't silently start emailing
+  with no visible change to the form the officer is looking at).
+- **All 9/9 event types confirmed mounted** as of the 2026-09-30 ratification pass: `CEAR_ROUTED`
+  (the 3-step routing flow's step-3 execute subviews, §3.4), `NOV_MARKED_SENT`,
+  `VIOLATION_ATTACHED`, `VIOLATION_MARKED_COMPLIANT`, `VIOLATION_NULLIFIED`,
+  `VIOLATION_STIPCOMP_EXTENDED`, `CITATION_STATUS_NCM`, `CASE_CLOSED`, `CASE_EVENT_NCM` — see
+  the codenforce dev index's CEAR-J doc for the exact host-XHTML/line-number audit trail per
+  event type.
+- Legacy routing blasts (§6.1) are **not** in scope for this invariant — they predate it, are
+  frozen (bugfixes only), and already have their own always-visible BB checkbox
+  (`notifySubscribersOnRouting`) serving a similar "officer is aware a blast may fire" purpose.
 
 ---
 

@@ -27,12 +27,21 @@ already know the mechanics and just need the recipe.
 - [git-branch-commit-conventions.md](/dev/reference/git/git-branch-commit-conventions) — branch
   naming grammar, `--no-ff` merge policy, itemID commit citation, milestone tags, and the
   branch/history interrogation command set.
+- [git-tagging-quick-reference.md](/dev/reference/git/git-tagging-quick-reference) — lightweight
+  vs. annotated tags, and why annotated is the correct default for release/milestone markers.
 
 ## Scenario playbooks
 
 - [git-stash-and-branch-rescue.md](/dev/reference/git/git-stash-and-branch-rescue) — moved work
   onto the wrong branch (stash it over), can't find which branch has a file, or already committed
   to the wrong branch (cherry-pick it over).
+- [git-stash-isolate-file-to-new-branch.md](/dev/reference/git/git-stash-isolate-file-to-new-branch)
+  — splitting one staged/untracked file out of a mixed commit onto its own new branch using
+  `git restore --staged`; includes a same-day correction note on why a pathspec-scoped
+  `git stash push` is unsafe for this (it snapshots the whole index/working tree regardless).
+- [git-compare-stale-branch-to-master.md](/dev/reference/git/git-compare-stale-branch-to-master)
+  — find which files/commits on an old branch never reached master, and read `git cherry`/`diff`
+  signs correctly.
 - [git-rename-rename-add-add-conflict-resolution.md](/dev/reference/git/git-rename-rename-add-add-conflict-resolution)
   — worked case study resolving a compound rename/rename + add/add merge conflict.
 

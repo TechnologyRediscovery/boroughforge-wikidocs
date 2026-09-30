@@ -28,7 +28,8 @@ Contact creator Eric Darsow via email at the 3 words echo, charlie, delta spelle
 - [Reference](/dev/reference/swpa-zoning-mapping-primer)
 - [Git reference](/dev/reference/git/index) — mental model, conventions, stashing/branch-rescue,
   MR review
-- By subsystem, e.g. [Letters & Emailing](/dev/subsystems/letters/overview)
+- By subsystem, e.g. [Letters & Emailing](/dev/subsystems/letters/overview) or
+  [CEAR](/dev/subsystems/cear/overview)
 
 None of the folders above have a landing page of their own yet — these link straight to a
 representative page inside each. For the full subsystem list, see the

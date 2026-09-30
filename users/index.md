@@ -24,6 +24,8 @@ Access step-by-step guides for all end users: code officers and municipal staff.
 - [Properties](/users/subsystems/property/overview)
 - [Persons](/users/subsystems/person/overview)
 - [Code Enforcement Case Management](/users/subsystems/cecase/overview)
+- [Code Enforcement Action Requests (CEAR)](/users/subsystems/cear/overview) — triaging,
+  routing, and submitting requests on a caller's behalf.
 - [Inspections](/users/subsystems/inspections/overview)
 - [Permitting](/users/subsystems/permitting/overview)
 - [Codebook (Ordinances) — Text block manager](/users/subsystems/codebook/textblocks)

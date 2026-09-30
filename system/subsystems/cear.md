@@ -2,7 +2,7 @@
 title: Code Enforcement Action Requests (CEAR)
 description: CEAR creation/review, plus the public submission portal and public status lookup.
 published: true
-date: 2026-08-07T00:00:00.000Z
+date: 2026-09-30T00:00:00.000Z
 tags: subsystem:cear, type:hub
 editor: markdown
 dateCreated: 2026-08-07T00:00:00.000Z

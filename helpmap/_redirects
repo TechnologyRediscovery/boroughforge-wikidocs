@@ -96,7 +96,10 @@ users-home                                    /users/index
 # TODO accounts-overview                 /users/subsystems/accounts/overview   # stub — not yet published
 
 # users/subsystems/cear/
-# TODO cear-overview                     /users/subsystems/cear/overview   # stub — not yet published
+cear-overview                                  /users/subsystems/cear/overview
+cear-submitting-a-cear-on-behalf-of-a-caller  /users/subsystems/cear/submitting-a-cear-on-behalf-of-a-caller
+cear-processing-and-routing-a-cear            /users/subsystems/cear/processing-and-routing-a-cear
+cear-triage-dashboard-and-priority-chips      /users/subsystems/cear/triage-dashboard-and-priority-chips
 
 # users/subsystems/cecase/
 cecase-caseload-manager                       /users/subsystems/cecase/caseload-manager
@@ -136,10 +139,19 @@ letters-overview                              /users/subsystems/letters/overview
 letters-printing-a-letter                     /users/subsystems/letters/printing-a-letter
 letters-letter-details                        /users/subsystems/letters/letter-details
 
+# admin/subsystems/cear/
+cear-admin-overview                            /admin/subsystems/cear/overview
+cear-configuring-update-blast-notifications    /admin/subsystems/cear/configuring-update-blast-notifications
+
 # admin/subsystems/letters/
 letters-creating-and-editing-letter-templates /admin/subsystems/letters/creating-and-editing-letter-templates
 letters-mail-merge-token-reference            /admin/subsystems/letters/mail-merge-token-reference
 letters-managing-print-styles                 /admin/subsystems/letters/managing-print-styles
+
+# public/subsystems/cear/
+cear-public-overview                           /public/subsystems/cear/overview
+cear-submitting-a-concern                      /public/subsystems/cear/submitting-a-concern
+cear-checking-status-and-unsubscribing         /public/subsystems/cear/checking-status-and-unsubscribing
 
 # users/subsystems/mapping/
 # TODO mapping-overview                  /users/subsystems/mapping/overview   # stub — not yet published
