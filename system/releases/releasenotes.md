@@ -10,6 +10,13 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
+## Release 5.7.0 on 06 OCT 2026
+- **Public Occ and rental inspection forms pilot live:** Public forms are now live for both internal system admin configuration, public facing completion, and bare bones internal review.
+- **Action request updates:** Now include muni-customizable option bundles for auto-email-blasting public and internal action requestors and staff by one-click registration.
+<!-- - Coming Soon: **Transfer phtos and docs between inspections and other containers: ** Allowing for use of Handheld App for photo caputre into Property evaluations -->
+- **Action Request bug:** Fixed unable to re-route property on action requests without error on reload
+- **Letters search bug:** Attempted fix to odd failure to load templates on letters search
+- **Inspection routing bug:** Fixed bug in the app-initiated field inspections: regardless of selected property from the search in the assignment dialog, user was shown their session property's cases and permit files for assignment targets, not their selected property. 
 
 ## Release 5.5.1 on 31-Aug-2026
 - Bug fix: Address links assigned nonzero priority on initial write, fouling up primary address selection logic.
