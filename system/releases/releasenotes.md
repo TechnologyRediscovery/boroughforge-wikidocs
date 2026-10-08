@@ -10,6 +10,18 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
+## Release 5.7.1 on 08 OCT 2026
+- **Photo grid sizing (NOVs and Letters):** Fixed notices of violation printing only ~2 photos per page when "Small (4/page)" was chosen with mixed portrait and landscape photos. NOVs and Letters now share one photo layout model, with consistent size caps per tier and clean page breaks.
+- **Unified photo captions:** Violation photos on NOVs and Letters now carry the same caption format, including the photo's position within its violation (e.g. "2 of 5") and document ID.
+- **Letters printing fidelity:** Header images are now centered in the generated PDF as well as in browser print. The PDF's spacing between the addressee block and the letter body can now be tuned separately from the browser value in the letter style manager.
+- **Letters live preview:** The Step 4 and template-manager previews no longer show a large empty gap between the header image and the addressee box, and no longer overlap the addressee with the body text.
+- **Letters style editing:** Fixed edits to a letter style appearing to save but showing old values until a second edit. Also clarified the labels on the addressee position and body-text clearance fields.
+- **Letters template preview:** Fixed the template-select preview in the letter flow not filling in the date of record, action due date, and reference number samples.
+- **Legacy NOV template migration:** Migrated templates no longer print the sender's phone and email twice.
+- **Property correspondence panel:** Letters shown on a property now link back to the specific case or permit file they belong to, display a descriptive label for it, and can be toggled between "direct to this property only" and "all related letters."
+- **Permit search bugs:** Fixed an error when searching permits by date of expiry, and fixed the results message always reporting "0 results" regardless of how many permits were found.
+- **Public form review:** The internal public-form review tab now shows each submission's full set of entered data, lets staff assign a review status, and supports free-text review notes.
+
 ## Release 5.7.0 on 06 OCT 2026
 - **Public Occ and rental inspection forms pilot live:** Public forms are now live for both internal system admin configuration, public facing completion, and bare bones internal review.
 - **Action request updates:** Now include muni-customizable option bundles for auto-email-blasting public and internal action requestors and staff by one-click registration.

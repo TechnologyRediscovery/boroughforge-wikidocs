@@ -31,6 +31,14 @@ substitution), `LetterTemplate`/`LetterCodeViolation`/`LetterDistributionEntry` 
   openhtmltopdf-pdfbox at finalization time, inlining photos as base64 data URIs. See the
   [PDF & document encoding primer](/dev/subsystems/letters/pdf-encoding-primer) for the
   libraries involved, PDF format internals, and styling/encoding gotchas.
+- **Print & preview styling** — browser print preview, the in-flow live preview, and the
+  template-manager preview panel all share the app's one global `style.css`; the PDF pipeline
+  uses a separate classpath-only `letter-print.css` (openhtmltopdf has no live stylesheet link,
+  only a text string embedded in a `<style>` block, with per-letter values injected via
+  placeholder substitution). See the
+  [print & preview styling architecture](/dev/subsystems/letters/print-and-preview-styling) brief
+  for where each surface's styling actually comes from and which ones are genuinely independent
+  copies.
 - **PDF image compression (III.H, 2026-08-12)** — `letter_buildPdfReadyHtml()`/
   `buildHeaderImageHtml()` recompress embedded JPEGs (downscale + requantize) for the generated
   PDF only, so attachment size stays under Resend/inbox limits; the stored blob originals and
