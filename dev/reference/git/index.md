@@ -3,7 +3,7 @@ title: Git reference index
 description: Landing page for the git/GitLab reference docs — mental model, conventions, stashing/branch-rescue, MR review, and conflict-resolution case studies
 published: true
 date: 2026-08-19T00:00:00.000Z
-tags: git, gitlab, development, tooling, type:index
+tags: git, gitlab, development, tooling, type:index, status:has-planned-ref
 editor: markdown
 dateCreated: 2026-08-19T00:00:00.000Z
 ---
@@ -21,6 +21,10 @@ already know the mechanics and just need the recipe.
 - [git-three-trees-recovery-primer.md](/dev/reference/git/git-three-trees-recovery-primer) — the
   working-tree/index/HEAD model, `git diff` modes, `status --short` decoding, the stash workflow,
   and SHA-1 hashing theory.
+- [git-kernel-model-and-going-public.md](/dev/reference/git/git-kernel-model-and-going-public) —
+  why git is shaped the way Linus built it, how the Linux kernel runs on it (maintainer trees,
+  patches, DCO, merge window), and what a solo dev with agent worktrees must add before strangers
+  can fork and send merge requests.
 
 ## Conventions
 
@@ -44,6 +48,14 @@ already know the mechanics and just need the recipe.
   signs correctly.
 - [git-rename-rename-add-add-conflict-resolution.md](/dev/reference/git/git-rename-rename-add-add-conflict-resolution)
   — worked case study resolving a compound rename/rename + add/add merge conflict.
+
+## Agents and worktrees
+
+- [agent-edit-review-git-add-patch.md](/dev/reference/git/agent-edit-review-git-add-patch) — reviewing
+  an agent's edits hunk by hunk with `git add -p`, the index as "accepted" state.
+  > 📅 **Planned.** A step-by-step guide to running several agents at once with linked worktrees, with a
+  > command card for every Git command and a sandbox checklist, is drafted and unpublished while it is
+  > rehearsed (subsystem `agent-workflow`).
 
 ## GitLab workflow
 

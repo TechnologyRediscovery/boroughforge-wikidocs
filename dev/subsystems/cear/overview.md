@@ -2,7 +2,7 @@
 title: Code Enforcement Action Requests (CEAR) — Developer Notes
 description: How CEARs are submitted, routed by officers, and notified about via email.
 published: true
-date: 2026-09-30T00:00:00.000Z
+date: 2026-11-02T00:00:00.000Z
 tags: subsystem:cear, audience:dev, type:overview
 editor: markdown
 dateCreated: 2026-08-07T00:00:00.000Z
@@ -23,7 +23,9 @@ blast dispatch.
 ## Current architecture
 
 See [CEAR Processing Logic](/dev/subsystems/cear/cear-logic) for the full submission → routing
-→ status-lifecycle → email-notification walkthrough.
+→ status-lifecycle → email-notification walkthrough. Known, not-yet-fixed gaps in the
+update-blast system are listed in
+[§6.2.7](/dev/subsystems/cear/cear-logic#627-known-gaps-as-of-2026-11-02-audit-not-yet-fixed).
 
 ## In-flight feature work
 

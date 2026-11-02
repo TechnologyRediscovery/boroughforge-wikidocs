@@ -62,11 +62,20 @@ Under the buttons you see:
 
 ### By owner file
 
-One row per file: **File**, **Title**, **Mail-to address** (with how it was found), **Parcels**,
-**Members**, **Cycle lock**, **Flags**, **Last activity**, and the row's actions.
+One row per file: **Title**, **Mail-to address** (with how it was found), **Parcels**,
+**Members**, **Cycle lock**, **Flags**, **Last activity**, and the row's actions. The file's number
+is shown as **(ID: N)** under the **Actions** menu in the last column.
 
 - **Title** is the file's title, unless a clerk gave the file a **Mail-to name**; then the list shows
   that name.
+- **Mail-to address** has a **change mailing address** link that opens a window to pick the address
+  (**view mailing address** when the file is locked). **view / edit** opens **Manage owner file name
+  and sorting**. See [Edit an owner file](/users/subsystems/workflow-builder/edit-an-owner-file).
+- **Cycle lock** shows **locked** or **open** for the cycle in the **Rental cycle** box, with a **lock
+  now** link on open files, and sorts when you click its heading. A locked file's name and mailing
+  address cannot be edited. See
+  [Lock and review owner files](/users/subsystems/workflow-builder/lock-and-review-owner-files).
+- **Flags** has a drop-down filter; choose **Needs review** to see the files with an open review.
 - **Parcels** counts every distinct property in the file: the head's own plus those of the businesses
   folded in.
 - **Members** counts the **businesses folded into the file**: other people or businesses the head
@@ -129,6 +138,7 @@ Each file shows small colored flags where the data needs a human look. The ones 
 | **No current parcels** | A saved file whose owner no longer owns anything. Consider retiring it. |
 | **Head deceased** | The head person has a deceased date. |
 | **Declared address retired** | The address a clerk declared has since been retired; the data's address is used. |
+| **Needs review** | Someone flagged the file for a second look and the review is not resolved yet. Use **resolve review** to clear it. |
 | **Address not verified** / **PO box address** | Information for whoever checks the labels. |
 
 ## The owner file badge on properties and people
@@ -144,10 +154,10 @@ You will **not** see a badge for a co-owner who has no file of their own, for a 
 
 ## What gets recorded
 
-Every change to a saved file, every lock, flag and review, and every audit list or label printed from
-it, adds a row to the file's log: who, when, what, and which run. The log is never edited (only a
-review row gets its outcome filled in). A label's log row records the sheet, the slot and the exact
-lines that were printed.
+Every change to a saved file, every lock, flag and review, and every label printed from it, adds a row
+to the file's log: who, when, what, and which run. Opening the audit list is **not** logged. The log is
+never edited (only a review row gets its outcome filled in). A label's log row records the sheet, the
+slot and the exact lines that were printed.
 
 ## Related pages
 

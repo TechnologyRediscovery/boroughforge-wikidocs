@@ -2,7 +2,7 @@
 title: Code Enforcement Action Requests (CEAR) — User Guide
 description: Triaging, routing, and submitting Code Enforcement Action Requests
 published: true
-date: 2026-09-30T00:00:00.000Z
+date: 2026-11-02T00:00:00.000Z
 tags: subsystem:cear, audience:staff, type:overview
 editor: markdown
 dateCreated: 2026-08-07T00:00:00.000Z
@@ -26,6 +26,9 @@ occupancy period, or a closeout decision like "invalid" or "referred to another 
   September 2026 update.
 - [Triage dashboard and priority chips](/users/subsystems/cear/triage-dashboard-and-priority-chips) —
   reading the color-coded age indicators and getting to the request you need faster.
+- [Choosing your CEAR update-email settings](/users/subsystems/cear/choosing-update-email-settings) —
+  a short guide for officers and town managers on which update emails to turn on and how much
+  detail they should include.
 
 ## Where you work
 
@@ -54,15 +57,15 @@ trigger one are:
 - Closing the case
 - Logging certain case events (only ones whose category is flagged as notifiable)
 
-Not every municipality has every one of these turned on — see the
-[CEAR admin overview](/admin/subsystems/cear/overview) for how that's configured. **Whichever
-ones are enabled, you will always see a visible notice and a one-click "don't send this time"
-option before any of them go out** — there is no configuration, anywhere, that lets one fire
-without you seeing it first. If you don't want an email sent for a particular action, just check
-that box; it only skips that one instance.
+Not every municipality has every one of these turned on — see
+[Choosing your CEAR update-email settings](/users/subsystems/cear/choosing-update-email-settings)
+and the [CEAR admin overview](/admin/subsystems/cear/overview). **Whichever ones are enabled,
+you will see a notice and a one-click skip option before the email goes out** (it appears only
+when someone would actually receive an email). If you don't want an email sent for a particular
+action, check the skip box; it only skips that one instance.
 
 <!-- SCREENSHOT NEEDED: One of the routing/case-action dialogs showing the blast notice banner
-with its "Don't send this time" skip option, right above the commit button. -->
+with its "Skip — do not send update email for this action" option, right above the commit button. -->
 
 ## See also
 

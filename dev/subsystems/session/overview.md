@@ -13,3 +13,6 @@ dateCreated: 2026-08-07T00:00:00.000Z
 🚧 **Stub.** Not yet written.
 
 See the [subsystem registry](/system/subsystem-registry) X-series entry `X1` for scope notes. This is an X-series dev-only concern — no admin/users/public spoke applies unless it graduates to the numbered list.
+
+Until the overview is written, start with the
+[JEE auth, HttpSession & bean scopes tutorial](/dev/subsystems/session/jee-auth-and-session-tutorial).

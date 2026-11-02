@@ -456,7 +456,10 @@ most recent lock-or-unlock row, from which the deriver computes `isLockedForCycl
 | Method | Query idea | Notes |
 |---|---|---|
 | `getHumanMailingAddressRows(humanIDs)` | `humanmailingaddress` ⋈ address tables where `deactivatedts IS NULL AND priority >= 0`, freshest first | `priority >= 0` is "not hidden". Priority is **not** used for ranking |
-| `getParcelMailingAddressRows(parcelKeys, roleID)` | `parcelmailingaddress` where role = 233 and active and in its validity window | The legacy county-scrape owner address |
+| `getParcelMailingAddressRows(parcelKeys, roleID)` | `parcelmailingaddress` where role = 233 and active and in its validity window | The legacy county-scrape owner address; feeds the ladder |
+| `getParcelMailingAddressRowsAnyRole(parcelKeys)` (D3e) | the same predicate with **no role filter** | Superset of the 233 read; feeds only the clerk's pick list. Added 2026-10-26 |
+| `getPropertyManagerLinkRows(parcelKeys, managerLorIDs)` (D3f) | `humanparcel` ⋈ `human` with `OWNER_LINK_PREDICATE` and the manager role array | Which persons manage the file's parcels; their addresses come from `getHumanMailingAddressRows`. Pick list only. Added 2026-10-26 |
+| `getLinkedObjectRoleTitles(lorIDs)` | `SELECT lorid, title FROM linkedobjectrole WHERE lorid = ANY(?)` | Role titles for the pick list's labels; filled into `roleTitleByLorID` with `putIfAbsent` |
 | `getDeclaredHumanMailingLinkRows(linkIDs)` / `…Parcel…` | the links saved files *point at*, with an **active flag**, deliberately including retired ones | So the deriver can detect `DECLARED_LINK_DEACTIVATED` |
 | `getHumanRefs(humanIDs)` | `SELECT humanid, name, businessentity, deceaseddate FROM human WHERE humanid = ANY(?)` | "Light person skeletons" (**never** a full `Human` load) |
 | `getParcelGroupNames(muni, parcelKeys)` | group names per parcel | The "Groups" chips; read once per derivation and shared by parcel-row copies |
@@ -647,6 +650,6 @@ In-memory work is a few passes over the row lists with hash maps (`O(rows)`), pl
    [lookup page](/dev/subsystems/workflow-builder/owner-files-membership-lookup) for why that is not a free
    skip.)
 6. **A derivation is a snapshot.** The `OwnerFileDerivation` held by the bean is the world at the moment it
-   ran. Writes (`ownerfile_updateFile`, `…_changeHead`, etc.) re-read the saved row themselves rather than
+   ran. Writes (`ownerfile_updateFileNames`, `ownerfile_updateMailtoAddress`, `…_changeHead`, etc.) re-read the saved row themselves rather than
    trusting the screen. After any write the bean re-derives (`refreshSaved()`).
 7. **Cross-file flags need the whole list** (theory §11). Do not look for them on a single-head result.

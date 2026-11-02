@@ -23,7 +23,7 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 |---|---|---|---|---|
 | 1 | [`accounts`](/system/subsystems/accounts) | User Accounts | `N_USER` | `n_user` |
 | 2 | [`municipality`](/system/subsystems/municipality) (muni) | Municipality Configuration | `I_MUNICIPALITY` | `i_municipality` |
-| 3 | [`codebook`](/system/subsystems/codebook) | Codebook (Ordinances) | `II_CODEBOOK` | `ii_codebook` |
+| 3 | [`codebook`](/system/subsystems/codebook) | Codebook (Ordinances) | `II_CODEBOOK` | `codebook` |
 | 4 | [`property`](/system/subsystems/property) | Property | `III_PROPERTY` | `property` |
 | 5 | [`person`](/system/subsystems/person) | Person | `IV_PERSON` | `person` |
 | 6 | [`event`](/system/subsystems/event) | Events / Calendar | `V_EVENT` | `v_event` |
@@ -71,8 +71,8 @@ tables for numbering, branch, and X-series rules, and for how to add a new subsy
 These are engineering concerns, not subsystems a code officer or muni admin would ever browse
 to by name. They live in `dev/` only and never get a `users/`, `admin/`, or `public/` folder —
 the one deliberate exception to the branch convention (see **Conventions** below). No
-`system/subsystems/` hub page exists yet for these six — their `dev/subsystems/<slug>/overview.md`
-stubs are still `published: false`, so there's nothing live to link to yet. See **Conventions**
+`system/subsystems/` hub page exists yet for these seven — their `dev/subsystems/<slug>/overview.md`
+pages are still `published: false` (stubs, or drafts awaiting rehearsal), so there's nothing live to link to yet. See **Conventions**
 → X-series naming and graduation below for the naming rationale and graduation path.
 
 | X# | Slug | Display name | CNF source dir | Notes |
@@ -83,6 +83,7 @@ stubs are still `published: false`, so there's nothing live to link to yet. See 
 | X4 | `db` | Database & Patching | `database/patches` | Schema conventions and the `dbpatch_betaN.sql` patch workflow. |
 | X5 | `server-architecture` | Server Architecture | `system` | WildFly/Undertow deployment topology, logging, streams. Split out of the former generic `system` bucket. |
 | X6 | `ui-mobile` | Cross-cutting UI / Mobile-Responsiveness | `system-general-xsubsystem` | Formerly listed as an unnumbered cross-cutting entry; folded into the X-series for consistency. |
+| X7 | `agent-workflow` | Agent Workflow & Git Worktree Orchestration | *(none: tooling, not app code)* | How a solo Java dev runs several coding agents at once on one repo: git-worktree layout, per-hunk review, merge-back, agent sandbox configuration, and the agent authorization-level × per-worktree git-logging spec. Dev-only; the not-yet-built parts are tracked in the codenforce repo under `docs/subsystems/agent-workflow/`. |
 
 ---
 

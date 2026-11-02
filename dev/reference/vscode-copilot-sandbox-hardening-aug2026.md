@@ -1,5 +1,7 @@
 # VS Code Copilot Chat — Tool-Approval & Repo-Only Sandbox Hardening
 
+> **Superseded in part (2026-10-29).** The VS Code sandbox and approval settings have changed since this note was written: `chat.agent.sandbox.allowNetwork` migrated to `network.allowNetwork`; `fileSystem.mac`/`.linux` are deprecated and ignored by the Copilot harness's default tools (so the `denyRead`/`allowWrite` settings below may silently do nothing); the docs now say MCP and LSP servers run in the sandbox; and `allowNetwork`, `allowDevToolAccess`, `credentials.*` and `allowUnsandboxedCommands` all default to permissive values. Use the current, item-numbered [agent sandbox checklist](/dev/subsystems/agent-workflow/agent-sandbox-checklist) (draft) and its stale-settings section before applying anything from this page. The analysis in §0 and the git-command classification remain useful.
+
 **Scope:** What Copilot Chat's approval dialogs actually protect against (and don't), the real on-disk config files that control it on this machine, and a concrete "repo-only" hardened setting suite for the 4-folder workspace (`codenforce`, `boroughforge-wikidocs`, `csepp_resurrection`, `mapnforce-LSAGRANTUPDATE`).
 
 **Verified on this machine 2026-08-19:** Ubuntu 24.04.4 LTS, VS Code with `bubblewrap 0.9.0` and `socat 1.8.0.0` already installed (`/usr/bin/bwrap`, `/usr/bin/socat`) — the two OS packages the Linux sandbox needs. No extra install step required to turn sandboxing on here.

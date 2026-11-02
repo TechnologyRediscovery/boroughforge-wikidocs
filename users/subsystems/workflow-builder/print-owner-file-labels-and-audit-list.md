@@ -35,8 +35,8 @@ flags, the properties, and a **Clerk check against the paper file** section with
 File number, so a marked-up sheet can be handed to a clerk and matched back to the file. Files with no
 address are listed again in an appendix.
 
-Opening the page writes one log row per saved file (**Audit sheet generated**), with the run code that
-prints in the page footer. Reloading the page logs again.
+Opening the page is **not** recorded in the owner file logs, and reloading it changes nothing. (Printing
+labels is still recorded, below.)
 
 ## Calibrate your printer
 

@@ -109,12 +109,16 @@ The codebase has grown three ways of making a shared service object, and **all t
 | **2. Declared in `faces-config.xml`** | `<managed-bean>` with a name, class and scope | `PersonCoordinator` (`application` scope), most backing beans (`view`/`session`) | `WEB-INF/faces-config.xml` |
 | **3. CDI annotations** | `@Named("x") @ApplicationScoped` on the class; discovery is on (`beans.xml` `bean-discovery-mode="all"`) | `OwnerFileCoordinator`, `OwnerFileIntegrator`, `CaseCoordinator`, `WorkflowEngineCoordinator`, `WorkflowBuilderCoordinator`, `DataExchangeCoordinator` | the class annotations |
 
-> **The generations overlap for some older names.** `UserCoordinator` is both built in `Initializer` *and*
-> declared in `faces-config.xml`; `PropertyIntegrator` likewise; `LetterCoordinator` is declared in
-> `faces-config.xml` *and* carries CDI annotations. Which instance `#{name}` returns then depends on EL
-> resolution order, so for those names "exactly one instance" is the **intent**, not something the code
-> guarantees (**UNVERIFIED** which wins). `PropertyCoordinator` and the owner-file classes are each
-> registered **once**, so they are unambiguous.
+> **The generations overlap for some older names.** A re-parse of `faces-config.xml` (132 `<managed-bean>`
+> entries) and `Initializer` (26 live `setAttribute` calls) on 2026-10-19 found **24 names published by more
+> than one mechanism**: 22 in both `Initializer` and `faces-config.xml` (including `userCoordinator`,
+> `personCoordinator`, `propertyIntegrator`, `personIntegrator`, `searchCoordinator`) and 2 in both CDI and
+> `faces-config.xml` (`letterCoordinator`, `letterIntegrator`). `searchCoordinator` also has **conflicting
+> scopes** (application attribute vs `session` bean). Which instance `#{name}` returns for these is
+> determined by EL resolution order, so for those names "exactly one instance" is the **intent**, not
+> something the code guarantees (**UNVERIFIED** which wins). `PropertyCoordinator` and the owner-file classes
+> are each registered **once**, so they are unambiguous. Tracked as backlog item #11 in
+> `docs/backlog/deferrableMaintenanceItems.md` (codenforce repo).
 
 The owner-file coordinator and integrator are **generation 3**:
 
@@ -532,6 +536,14 @@ and `SessionBean sb = …; return sb;`) so nothing per-call is stored in a share
 `BackingBeanUtils` is shared by the entire application, so the change is ECD's call and needs a full
 regression pass. It is recorded here so you can recognise the pattern and **avoid reproducing it in new
 code**.
+
+**Tracked in the backlog.** This was already item #10 in `docs/backlog/deferrableMaintenanceItems.md`
+(codenforce repo) for `connx`. On 2026-10-19 that item was **extended** with: the same pattern for the
+per-user fields `sessionBean` and `facesUser` (plus `searchCoordinator`, a scope conflict); an audit showing
+the non-idempotent surface is just those four fields (27 of the 29 provider getters that store a bean in a
+field store an application-scoped one, which is harmless); the stale-`connx`-on-failure defect above; and a
+re-rating recommendation (High if instrumentation confirms an identity leak). The registration overlap
+described in §2.4 is item #11.
 
 ## 7. Choosing which kind of class to write
 

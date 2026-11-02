@@ -3,7 +3,7 @@ title: Home-Rolled Keep/Undo: Per-Hunk Review of Agent Edits with git add -p
 description: How-to for reviewing LLM agent edits hunk by hunk from the command line, using the git index as the accepted state. Replaces VS Code's per-edit Keep/Undo, removed from non-Local agent harnesses.
 published: true
 date: 2026-10-16T00:00:00.000Z
-tags: git, how-to, agent-workflow, code-review, vscode, copilot
+tags: git, how-to, agent-workflow, code-review, vscode, copilot, status:has-planned-ref
 editor: markdown
 dateCreated: 2026-10-16T00:00:00.000Z
 ---
@@ -150,7 +150,8 @@ git stash drop 'stash@{0}'              # discard rejects for good
 
 ## 6. Operating rules
 
-1. **One writer per working tree.** Don't run two agent sessions in the same checkout, and don't hand-edit files the agent is working on during a turn.
+1. **One writer per working tree.** Don't run two agent sessions in the same checkout, and don't hand-edit files the agent is working on during a turn. To run several agents at once, give each its own linked worktree (`git worktree add`); the functions on this page then run *inside each worktree*, with one caveat: **the stash is shared.** All refs starting with `refs/` are shared between worktrees, and the stash lives in `refs/stash`, so `stash@{0}` is whatever was stashed last in *any* worktree ([git-worktree, REFS](https://git-scm.com/docs/git-worktree#_refs)). Until the helpers are adapted, do not use `agent-review` (which parks rejects with `git stash push`) or `agent-rejected` (which reads `stash@{0}` by default) with more than one worktree.
+   > 📅 **Planned.** A step-by-step guide for running several agents on one repository with worktrees, including adapted tagged-stash helpers, is drafted and unpublished while it is rehearsed.
 2. **Don't review while the agent is running.** A write in the middle of a review makes your decisions apply to stale hunks.
 3. **Always run `agent-base` before prompting.** Without it, the agent's changes get mixed with earlier unreviewed work, and the index no longer means "accepted."
 4. **Commit only after `git diff` is empty.** That proves every pending hunk was decided.

@@ -10,6 +10,19 @@ dateCreated: 2025-12-21T02:39:41.137Z
 
 # Release notes
 
+## Release 5.8.2 on 2 NOV 2026
+- **Code source and code book new features:** Code elements can now be transferred between code sources, for easy consolidation and cleaning of legacy and scattered code sources. The codebook and code source pages both now use the full screen width for the mega table display, with parent object choice (change source or book) in their own overlay dialogs. 
+- **Code element and enforcement delete cascade:** Prior to this update, deactivating a code element would leave orphaned entries in code books, lightning cases, and checklists. Now, before committing a deac operation, all the uses of those elements are found and displayed in the dialog for user review. NOTE: Clearly, once an element is used in a violation or NOV or citation or inspection, deactivating that element or enforceability record in a code source or book leaves those officer-declared uses unaffected.
+- **Person merging bug fix and overhaul:** Person merging was actually leading to a bunch of messy records--the subordinate merge targets were not often getting deactivated at the end of a merge, meaning they stayed alive for users to link to and add data to. Those records will be cleaned in coming days, and going forward, the person merging process is much more robust and provides much more useful output to users in the merge logs.
+- **Owner file upgrades:** The rental registry manager's owner file tool UI is now much more convenient, with one click lock and unlock, easy access to address changes.
+
+## Release 5.8.1 on 26 OCT 2026
+- **Searching:** Ya'll no longer have to reset the bloody property and person searches to run another search! Your previous search values remain intact, including parameter selection and parameter values. The reset query tool stays around for when you need a true reset.
+- **Person rename warning**: When renaming a person, a warning is displayed to nudge users to NOT rename one person into a completely different person. Once a person is linked to a citation, users must have manager rank or better to edit the name. Finally, all renames are added to the person's alias in addition to having the changes logged in the person notes.
+
+## Release 5.8.0 on 23 OCT 2026
+- **Owner file pilot** is now live in the rental registry manager. This facility allows for a convenient display of the properties a single person owns just in your municipality which also follows LLC/corporate ownership such that if a person owns an LLC and that LLC owns properties, if the links are correctly inputted into CNF, the owner fill will capture those transitive ownerships one layer deep (e.g. CNF won't yet include the LLCs owned by an LLC and that second LLC's properties, although you can make such links).
+
 ## Release 5.7.1 on 08 OCT 2026
 - **Photo grid sizing (NOVs and Letters):** Fixed notices of violation printing only ~2 photos per page when "Small (4/page)" was chosen with mixed portrait and landscape photos. NOVs and Letters now share one photo layout model, with consistent size caps per tier and clean page breaks.
 - **Unified photo captions:** Violation photos on NOVs and Letters now carry the same caption format, including the photo's position within its violation (e.g. "2 of 5") and document ID.

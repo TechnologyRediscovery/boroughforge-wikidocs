@@ -335,9 +335,9 @@ file" lookups), `ownerfilelog_cycle_op_idx (muni_municode, rentalcycle, operatio
 | `PROPOSED` | `ownerfile_proposeFiles` | no |
 | `CREATED_MANUALLY` | `ownerfile_createFile` | no |
 | `HEAD_CHANGED` (+ `TITLE_CHANGED`) | `ownerfile_changeHead` | no |
-| `TITLE_CHANGED`, `PAPER_REF_CHANGED`, `MAILTO_UPDATED`, `NAME_DECLARED` | `ownerfile_updateFile`, `ownerfile_assignMailtoAddress` | no |
+| `TITLE_CHANGED`, `PAPER_REF_CHANGED`, `MAILTO_UPDATED`, `NAME_DECLARED` | `ownerfile_updateFileNames` (title, paper ref, name), `ownerfile_updateMailtoAddress` and `ownerfile_assignMailtoAddress` (address) | no |
 | `PARCEL_ADDED_TO_GROUP` | `ownerfile_addParcelToGroup` | no |
-| `AUDIT_SHEET_PRINTED` | `ownerfile_buildAuditSheet` (one row per saved file per run) | no |
+| `AUDIT_SHEET_PRINTED` | **legacy, no longer written** (`ownerfile_buildAuditSheet` stopped logging 2026-10-28, pt2 item 14); old rows still read | no |
 | `LABELS_PRINTED` | `ownerfile_logLabelsPrinted` (at PDF **download**, once per run) | no |
 | `LOCKED_FOR_CYCLE_MAILING`, `UNLOCKED` | `ownerfile_lockForCycle`, `ownerfile_unlockForCycle` | no |
 | `REVIEW_FLAGGED` | `ownerfile_flagForReview` | **yes** |

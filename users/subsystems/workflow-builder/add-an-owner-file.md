@@ -26,7 +26,7 @@ hand. A person heads at most one file in a municipality.
 
 1. On the **Owner Files** panel click **Add an owner file**.
 2. Type at least three letters of the person's name in **Person's name (3 letters or more)** and click
-   **Find person**. Typing several words narrows the list: every word has to appear in the name.
+   **Find person** (or press **Enter** in the name box). Typing several words narrows the list: every word has to appear in the name.
    County records usually put the last name first, for example `SMITH JOHN A`.
 3. Read the list. Each row shows how many properties the person owns **here** (**Parcels owned here**),
    how many businesses they control (**Entities controlled**), and whether they **Already heads** a

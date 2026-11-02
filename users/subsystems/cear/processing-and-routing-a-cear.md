@@ -2,7 +2,7 @@
 title: Processing and routing a CEAR
 description: The 3-step routing flow and every route available, including the September 2026 changes
 published: true
-date: 2026-09-30T00:00:00.000Z
+date: 2026-11-02T00:00:00.000Z
 tags: subsystem:cear, audience:staff, type:howto
 editor: markdown
 dateCreated: 2026-09-30T00:00:00.000Z
@@ -88,21 +88,28 @@ re-routing a request that was already terminal automatically leaves an internal 
 the change (which route it moved from and to, and who did it) — you don't need to write that
 note yourself.
 
-## The officer notice — you always see it before an email goes out
+## The officer notice — you see it before an update email goes out
 
 Depending on your municipality's configuration, committing a route (or several other
 case-lifecycle actions later on) can send an automatic status-update email to the requestor
 and/or the staff member who logged the request. **Whenever that's possible, you'll see an
-inline notice right above the commit button** — something like *"A status update email may be
-sent to N recipient(s) for this action"* — with a one-click **"Don't send this time"** option.
-This is not configurable by your municipality and has no exceptions: you always get to make the
-final call on that one action, regardless of what's been enabled behind the scenes.
+inline notice right above the commit button** — *"N CEAR subscriber(s) will receive an update
+email when this action is …"* — with a **"Skip — do not send update email for this action"**
+checkbox and an optional public-note box. The notice appears only when the municipality has that
+event turned on and at least one eligible recipient exists. Skipping affects only that one action.
 
-<!-- SCREENSHOT NEEDED: The officer notice banner with its "Don't send this time" checkbox,
-directly above a route's commit button. -->
+The routing dialog also has an older, separate checkbox — **"Notify action requestor and/or
+subscribers of this routing action via email if they requested updates"** — which is on by
+default. It controls the legacy routing email only; uncheck it if you don't want that one sent.
+For help deciding what your municipality should enable, see
+[Choosing your CEAR update-email settings](/users/subsystems/cear/choosing-update-email-settings).
+
+<!-- SCREENSHOT NEEDED: The officer notice banner with its "Skip — do not send update email for
+this action" checkbox, directly above a route's commit button. -->
 
 ## See also
 
+- [Choosing your CEAR update-email settings](/users/subsystems/cear/choosing-update-email-settings)
 - [Triage dashboard and priority chips](/users/subsystems/cear/triage-dashboard-and-priority-chips) —
   reading the color-coded age indicators before you start routing.
 - [Submitting a CEAR on behalf of a caller](/users/subsystems/cear/submitting-a-cear-on-behalf-of-a-caller)

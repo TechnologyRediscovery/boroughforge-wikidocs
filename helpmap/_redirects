@@ -100,6 +100,7 @@ cear-overview                                  /users/subsystems/cear/overview
 cear-submitting-a-cear-on-behalf-of-a-caller  /users/subsystems/cear/submitting-a-cear-on-behalf-of-a-caller
 cear-processing-and-routing-a-cear            /users/subsystems/cear/processing-and-routing-a-cear
 cear-triage-dashboard-and-priority-chips      /users/subsystems/cear/triage-dashboard-and-priority-chips
+cear-choosing-update-email-settings           /users/subsystems/cear/choosing-update-email-settings
 
 # users/subsystems/cecase/
 cecase-caseload-manager                       /users/subsystems/cecase/caseload-manager

@@ -2,7 +2,7 @@
 title: CEAR Processing Logic — Submission, Routing, and Email Notifications
 description: How Code Enforcement Action Requests are submitted, routed by officers, and how the email-notification system is wired into that lifecycle.
 published: true
-date: 2026-09-28T00:00:00.000Z
+date: 2026-11-02T00:00:00.000Z
 tags: subsystem:cear, audience:dev, type:architecture
 editor: markdown
 dateCreated: 2026-09-28T00:00:00.000Z
@@ -355,7 +355,7 @@ of one pipeline — a single routing action can fire both, independently, in the
 | Event scope | CEAR routing only | CEAR routing **plus** case-lifecycle events for the CEAR's whole life: NOV sent, violation attached/compliant/nullified/stipcomp-extended, citation status recorded, case closed, case event logged |
 | Gating | One BB checkbox (`notifySubscribersOnRouting`), **on** by default | Per-muni, per-event-type JSON settings (`CEARMuniUpdateBlastSettings`), **off** by default for every event type; plus independent officer opt-out and submitter opt-out gates |
 | Recipients per call | Broadcasts to the muni's whole staff-subscriber list (`UserEmailSettings.cearSubscribeEnabled`) **+** the requestor | One targeted email per eligible submitter — the external requestor, or (separately) the specific staff user who created that CEAR, if they opted in |
-| Content control | Fixed content, split only internal vs. external | 3 detail levels (MINIMAL/STANDARD/FULL — FULL currently clamped to STANDARD at runtime) |
+| Content control | Fixed content, split only internal vs. external | 3 detail levels (MINIMAL/STANDARD/FULL — FULL is clamped to STANDARD unless the CEAR was staff-submitted; §6.2.3) |
 | Unsubscribe | None | Per-recipient opaque opt-out token + link |
 | Content builder | `cear_buildRoutingUpdateEmailHTML` | `comm_buildCEARUpdateBlastHTML` |
 | Context object | Flat params (`routeName`, `publicNote`, `actingOfficer`, `internalRecipient`) | `CEARUpdateBlastContext` (event type, host case, violation/NOV/citation refs, detail-relevant fields) |
@@ -448,7 +448,7 @@ Addresses are tagged `[staff]` or `[requestor]` to distinguish the two pathways.
 A per-municipality-configurable blast system covering every notable event in a CEAR's — and its
 host case's — lifecycle, not just routing. Settings, event catalog, detail levels, and opt-out
 mechanics are specified in the codenforce dev index at
-`docs/subsystems/i_municipality/municearupdatesettings-jul2026.md`; this section summarizes how
+`docs/subsystems/cear/municearupdatesettings-jul2026.md`; this section summarizes how
 it wires into CEAR processing specifically.
 
 #### 6.2.1 Event Catalog & Muni Settings
@@ -456,19 +456,25 @@ it wires into CEAR processing specifically.
 `CEARUpdateBlastEventTypeEnum` enumerates the blastable events, each independently switchable
 per municipality (all **off** by default) via the JSON-typed `updateblastsettings` column,
 managed in the muniManage admin page's "CEAR Subscriber Update Blasts" panel
-(`MunicipalityManageBB`):
+(`MunicipalityManageBB`, System → Municipalities, sysadmin-only sidebar section). The panel is
+read-only until **Edit blast settings** is clicked (`toggleEditMuniCEARBlast`; the same button
+then reads **Save edits**; `onEditMuniCEARBlastAbort` cancels). Save goes through
+`CommunicationCoordinator.comm_saveMuniUpdateBlastSettings`, which forces
+`officerOptOutAllowed=true` on every row.
 
 | Event | Fired from |
 |---|---|
-| `CEAR_ROUTED` | `CaseCoordinator.cear_dispatchRouteBlast()` — same routing commits as legacy Trigger B, but only for **terminal** routes, and only once the muni has this event enabled |
-| `NOV_MARKED_SENT` | NOV marked sent (`NoticeOfViolationBB`) |
-| `VIOLATION_ATTACHED` | Violation attached to a case |
-| `VIOLATION_MARKED_COMPLIANT` / `VIOLATION_NULLIFIED` / `VIOLATION_STIPCOMP_EXTENDED` | Violation batch operations (`CECaseBB`) |
-| `CITATION_STATUS_NCM` | Citation status recorded (`CitationBB`) |
-| `CASE_CLOSED` | Case closed (`CaseloadActionsBB`, `CECaseBB`) |
-| `CASE_EVENT_NCM` | Officer-selected event category logged (`EventBB` / `EventCoordinator`) |
+| `CEAR_ROUTED` | `CaseCoordinator.cear_dispatchRouteBlast()` (private) — called from `cear_connectCEARToCECase`, `cear_connectCEARToOccPeriod` and `cear_updateCEAR`. Same routing commits as legacy Trigger B, but only for **terminal** routes. Referrals reuse this event. Also sends the internal-submitter copy. |
+| `NOV_MARKED_SENT` | `CaseCoordinator.nov_markAsSent` |
+| `VIOLATION_ATTACHED` | `CaseCoordinator.violation_dispatchAttachmentBlastIfConfigured` — once per batch |
+| `VIOLATION_MARKED_COMPLIANT` / `VIOLATION_NULLIFIED` / `VIOLATION_STIPCOMP_EXTENDED` | `CaseCoordinator.violation_batchOperationExecute` (switch on COMPLIANCE / NULLIFY / STIPCOMP_EXTENSION) — one blast per batch, suppressed when `isBlastOptOut()` or the batch's success count is < 1 |
+| `CITATION_STATUS_NCM` | `CaseCoordinator.citation_insertCitationStatusLogEntry`, only when `CitationStatus.isNotifyCaseMonitors()` (preview in `CitationBB`) |
+| `CASE_CLOSED` | `CaseCoordinator.cecase_closeCase` |
+| `CASE_EVENT_NCM` | `EventCoordinator.event_dispatchCaseEventNCMBlastIfConfigured`, called at the end of `addEventCore`; only when `EventCategory.isNotifymonitors()` on a `CECase` holder (preview in `EventBB.refreshEventBlastRecipients`). See §6.2.7 for caveats. |
 
-Each enabled event type carries its own `CEARUpdateBlastDetailLevelEnum` (§6.2.3).
+Each enabled event type carries its own detail level
+(`CEARUpdateBlastDetailLevelEnum`, §6.2.3). A fresh `CEARUpdateBlastEventConfig` defaults to
+`enabled=false`, `MINIMAL`, `officerOptOutAllowed=true`.
 
 #### 6.2.2 Recipients & Gating
 
@@ -476,7 +482,12 @@ Every dispatch resolves recipients from the CEAR(s) attached to the case, then s
 targeted email per unique eligible address (de-duplicated, normalized) — never a broadcast list:
 
 1. **External requestor** — the CEAR's `requestorEmail`, when non-blank and not opted out
-   (`isCEARSubmitterOptedOut`).
+   (`isCEARSubmitterOptedOut`). **`getemailupdates` is not consulted** anywhere in this path
+   (`cecase_getCEARsForBlast`, `cecase_assembleEligibleBlastCEARs`, `comm_sendCEARUpdateBlast`);
+   that flag gates only the legacy routing blast (§6.1.2). A submitter who gave an email but left
+   "send me updates" unticked is therefore eligible once the muni enables an event. Staff
+   submissions made "as self" store a null `requestorEmail` (email lives on the Person record),
+   so they only receive via item 2.
 2. **Internal submitter** — the staff user who originally created that specific CEAR
    (`CEActionRequest.createdBy`), resolved via `comm_resolveEmailForCEARInternalSubmitter()`,
    sent **only if** `cear.isNotifyInternalSubmitter()==true` (an opt-in captured at submission
@@ -496,24 +507,32 @@ no error.
 
 #### 6.2.3 Detail Levels
 
-Each muni/event-type pair configures a `CEARUpdateBlastDetailLevelEnum`:
+Each muni/event-type pair configures a `CEARUpdateBlastDetailLevelEnum`. `comm_buildCEARUpdateBlastHTML`
+always renders: header banner, property row, reference row, submitted row, the "Update" row
+(event descriptor), a tagline, an "Action taken by" row (internal-submitter copy only), the
+inquiry-contact block, and the footer (unsubscribe link only when the CEAR has an opt-out token
+**and** `optOutBaseUrl` is configured).
 
 | Level | Adds |
 |---|---|
-| `MINIMAL` | Reference #, submission date, the event itself, property address |
-| `STANDARD` | + concern type, any public note |
-| `FULL` | + affected-violation count — **currently always clamped down to `STANDARD`** at runtime (`comm_clampDetailLevel`) for non-internal submitters; reserved for future use |
+| `MINIMAL` | Only the always-rendered rows above. **The officer's public note is dropped at this level.** |
+| `STANDARD` | + "Concern Type" row, + "Notes" row (public note, if any) |
+| `FULL` | + "Items Affected" count when `violationCount > 1` — **but** `comm_clampDetailLevel` reduces FULL to STANDARD unless `cear.isInternalUserSubmitter()`, so only staff-submitted CEARs ever see it. (The enum's "reserved … always clamped" comment is stale.) |
+
+There is no itemized violation list at any level — only a count, and only at FULL.
 
 #### 6.2.4 Dispatch Call Sites
 
-Two private `CaseCoordinator` dispatchers build a `CEARUpdateBlastContext` and hand it to
+Two `CaseCoordinator` dispatchers build a `CEARUpdateBlastContext` and hand it to
 `CommunicationCoordinator.comm_sendCEARUpdateBlast()`:
 
-- `cear_dispatchRouteBlast(cear, hostCase, route, publicNote, ua)` — the CEAR-routing path,
-  called alongside (not instead of) legacy Trigger B; fires only for terminal routes.
+- `cear_dispatchRouteBlast(...)` (private) — the CEAR-routing path, called alongside (not
+  instead of) legacy Trigger B; fires only for terminal routes and reads `cear.isBlastOptOut()`.
 - `cecase_dispatchBlastIfConfigured(eventType, cse, cv, nov, citation, eventDescriptor,
-  publicNote, violationCount, officerOptedOut, ua)` — every other case-lifecycle event; iterates
-  all CEARs attached to the case and dispatches once per eligible external/internal recipient.
+  publicNote, violationCount, officerOptedOut, ua)` (private) — every other case-lifecycle event
+  **except `CASE_EVENT_NCM`**; iterates the case's eligible external requestors
+  (`cecase_assembleEligibleBlastCEARs`) and internal submitters
+  (`cecase_assembleEligibleInternalSubmitterCEARs`).
 
 Both are best-effort/non-throwing: a blast failure never affects the primary operation
 (routing, closing a case, marking a violation compliant, etc.).
@@ -530,36 +549,71 @@ checkbox.
 
 #### 6.2.6 Officer Notice Invariant (P1 — ratified 2026-09-30, CEAR-J)
 
-**No blast under this system may ever fire without the acting officer first seeing a
-one-click-skippable notice.** This is a hard product invariant, not a per-event-type setting —
-it applies identically whether the muni has that event type's blast enabled or disabled, and
-there is no admin override, permission, or role that bypasses it. Ratified after an internal
-review found the original Phase 12 design would have let a blast go out silently from a couple
-of case-lifecycle action buttons with no confirmation step at all.
+**No blast under this system may fire from an officer-initiated action without the officer
+first having the chance to skip it.** This is a hard product invariant, not a per-event-type
+setting — there is no admin override, permission, or role that bypasses it. Ratified after an
+internal review found the original Phase 12 design would have let a blast go out silently from
+a couple of case-lifecycle action buttons with no confirmation step at all. The one known
+exception is system-generated `CASE_EVENT_NCM` (§6.2.7 item 2).
 
 Mechanics:
 
-- A single composite component, `cearBlastNoticeCC` (`<tt:cearBlastNoticeCC .../>` — verify the
-  actual namespace alias in each host file before reuse), renders a small inline banner
-  immediately above the commit button for every action that can dispatch a Phase-12 blast: *"A
-  status update email may be sent to N recipient(s) for this action"* with a **"Don't send this
-  time"** one-click checkbox/toggle that maps straight to the `officerOptedOut` parameter on
-  `cecase_dispatchBlastIfConfigured` (§6.2.4) — opting out skips only *this one dispatch*, not
-  the muni's setting for the event type going forward.
-- The notice renders **unconditionally** once the host action is one of the 9
-  `CEARUpdateBlastEventTypeEnum` values, even when the muni currently has that specific event
-  type toggled off in `updateblastsettings` — so an officer is never surprised the other
-  direction either (toggling it on between page load and commit can't silently start emailing
-  with no visible change to the form the officer is looking at).
-- **All 9/9 event types confirmed mounted** as of the 2026-09-30 ratification pass: `CEAR_ROUTED`
+- A single composite component, `resources/components/cearBlastNoticeCC.xhtml`
+  (`<tt:cearBlastNoticeCC .../>` — verify the actual namespace alias in each host file before
+  reuse), renders a small inline banner immediately above the commit button for every action
+  that can dispatch a Phase-12 blast: *"N CEAR subscriber(s) will receive an update email when
+  this action is {eventLabel}."* with a **"Skip — do not send update email for this action"**
+  checkbox and an optional public-note textarea. The checkbox binds to the entity's
+  `blastOptOut` flag (`CEActionRequest`, `Event`, the violation batch, etc.), which each
+  dispatch site passes through as `officerOptedOut` — opting out skips only *this one
+  dispatch*, not the muni's setting going forward.
+- The notice renders **only when the recipient list is non-empty.** The BB asks the coordinator
+  for a preview (`cecase_getBlastRecipientsForOfficerPreview` for case events,
+  `cear_getBlastRecipientsForOfficerPreview` for routing), which returns empty unless the muni
+  has the event type enabled **and** at least one non-opted-out recipient exists. So the real
+  invariant is "if an email would go out, the officer sees the notice" — a disabled event shows
+  nothing and sends nothing. Preview and dispatch gate on the same muni resolution (host case
+  muni first, then the CEAR's) so they cannot disagree.
+- **All 9/9 event types are mounted** as of the 2026-09-30 ratification pass: `CEAR_ROUTED`
   (the 3-step routing flow's step-3 execute subviews, §3.4), `NOV_MARKED_SENT`,
   `VIOLATION_ATTACHED`, `VIOLATION_MARKED_COMPLIANT`, `VIOLATION_NULLIFIED`,
   `VIOLATION_STIPCOMP_EXTENDED`, `CITATION_STATUS_NCM`, `CASE_CLOSED`, `CASE_EVENT_NCM` — see
   the codenforce dev index's CEAR-J doc for the exact host-XHTML/line-number audit trail per
-  event type.
+  event type. (`CASE_EVENT_NCM` is mounted at `eventTools.xhtml` as `event-add-blast-notice`.)
 - Legacy routing blasts (§6.1) are **not** in scope for this invariant — they predate it, are
-  frozen (bugfixes only), and already have their own always-visible BB checkbox
-  (`notifySubscribersOnRouting`) serving a similar "officer is aware a blast may fire" purpose.
+  frozen (bugfixes only), and already have their own always-visible checkbox
+  (`notifySubscribersOnRouting`, `cear-flow-notify-cb` in `cearCentral.xhtml`, default on)
+  serving a similar "officer is aware a blast may fire" purpose.
+
+#### 6.2.7 Known Gaps (as of 2026-11-02 audit — not yet fixed)
+
+1. **`CASE_EVENT_NCM` skips the internal-submitter copy.** `event_dispatchCaseEventNCMBlastIfConfigured`
+   hand-rolls a loop over `cecase_getCEARsForBlast` instead of calling
+   `cecase_dispatchBlastIfConfigured`, so staff submitters who opted in get no email for this
+   event type — yet the officer preview (`cecase_getBlastRecipientsForOfficerPreview`) lists
+   them as `[staff]`. The preview can promise a copy that never goes out.
+2. **Double-blast / silent blast from auto-generated events.** `EventCoordinator.addEventCore`
+   dispatches `CASE_EVENT_NCM` for every `addEvent` and `addEventSystemGenerated` call on a
+   `CECase` holder. System paths (`CaseCoordinator` auto-events,
+   `citation_configureCitationStatusLogEvents` via `status.getEventCategoryTrigger()`,
+   `LetterCoordinator`) show no officer notice, and a flagged category stacks on top of any
+   dedicated blast (`CITATION_STATUS_NCM`, `CASE_CLOSED`). Admin guidance: only flag categories
+   officers select manually.
+3. **`getemailupdates` is ignored** by this system (§6.2.2): any CEAR with a requestor email is
+   eligible. Public-facing copy that says updates depend on the submitter's own opt-in is only
+   true of the legacy routing blast.
+4. **Detail-level dropdown in the config panel: fixed 2026-11-02.** `muniManage.xhtml`'s
+   `blast-enabled-cb` now carries `<p:ajax update="blast-detail-level-som"/>`, so the row's
+   `disabled="#{!eventRow.config.enabled}"` is re-evaluated as soon as the box is ticked and the
+   dropdown enables in the same edit session. (Before the fix it was evaluated only at full
+   render, so a newly enabled row saved at the MINIMAL default.)
+5. **No coordinator-side permission gate on save.** `comm_saveMuniUpdateBlastSettings` only
+   null-checks the user. The only protection is the sidebar's System section being shown to
+   sysadmins (`SystemCoordinator.buildSideBarNavList`). This departs from the project's
+   "Permission gates" pattern (BB Rule 8): the mutating method should independently re-check.
+6. **Stale label.** `EventCategory.notifymonitors` ("Notify Case Monitors") and
+   `CitationStatus.notifyCaseMonitors` are legacy names; they now mean "send the CEAR update
+   blast to the case's CEAR submitters."
 
 ---
 

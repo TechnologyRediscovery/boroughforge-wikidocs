@@ -219,7 +219,9 @@ problem).
 | `controlEdges` (D2) | `getControlEdgeRows…` | Raw `OwnerFileControlEdgeRow` (link id, role, source id, target id), **not** oriented |
 | `humans` (D6) | `getHumanRefs` | `humanid → Human` skeleton (name, business flag, deceased date) |
 | `humanAddressLinks` (D3a) | `getHumanMailingAddressRows` | Active, non-hidden human mailing links |
-| `parcelOwnerMailingLinks` (D3b) | `getParcelMailingAddressRows` | Active role-233 parcel links |
+| `parcelOwnerMailingLinks` (D3b) | `getParcelMailingAddressRows` | Active role-233 parcel links (feeds the mail-to **ladder**) |
+| `parcelAllRoleMailingLinks` (D3e) | `getParcelMailingAddressRowsAnyRole` | Active parcel links of **any** role; feeds only the clerk's pick list (added 2026-10-26) |
+| `propertyManagerLinks` (D3f) | `getPropertyManagerLinkRows` | Active `humanparcel` links whose role is `property_manager_lorid` (120), on the file's parcels; their humans' own address links are read through `humanAddressLinks`. Pick list only (added 2026-10-26) |
 | `declaredHumanLinks` / `declaredParcelLinks` (D3c/d) | `getDeclared…LinkRows` | The links saved files *point at*, active or not |
 | `existingFiles` (D4) | `getActiveOwnerFile…` | Saved files as **shells** |
 | `ownerlessGroupParcels` (D5) | `getOwnerlessGroupParcelRows` | Group parcels with no owner link |
@@ -563,10 +565,15 @@ can be computed ("what the data would have said") and why a deactivated declarat
 `flagsBeforeLadder` snapshot lets a valid declaration **rewind** the ambiguity flags: once the clerk picked
 among several addresses, `MAILTO_HEAD_ADDRESSES_DIFFER` would be noise.
 
-**Candidate addresses** (`buildAddressCandidates`) are every address a clerk may pick: the declared link, the
-head's own links, each folded entity's links, then the legacy role-233 links on the file's parcels; one entry
-per distinct address. Each carries a **key** (`"H" + humanLinkId` or `"P" + parcelLinkId`) so a pick points
-at exactly one link. The edit dialog only lets a clerk pick from this list.
+**Candidate addresses** (`buildAddressCandidates`) are every address a clerk may pick, one entry per distinct
+address, in this order: the declared link, the head's own links, each folded entity's links, the parcel links
+of **any role** on the file's parcels (most widely shared address first), then the own address links of the
+persons linked to those parcels as property manager. A later source that offers an address already listed is
+named in the first entry's note ("; also ...") rather than listed again, and every label carries the link's role
+title. Each entry carries a **key** (`"H" + humanLinkId` or `"P" + parcelLinkId`) so a pick points
+at exactly one link. The edit dialog only lets a clerk pick from this list. The mail-to **ladder** is separate and
+still reads only the head's links and the role-233 pool, so widening this list does not change any proposal
+(see codenforce `docs/subsystems/workflows/phases/phase16-version3-pt2-tweaks.md` §P2.7d).
 
 ## 11. Flags
 

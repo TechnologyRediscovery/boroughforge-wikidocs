@@ -8,6 +8,9 @@ editor: markdown
 dateCreated: 2025-11-26T16:20:44.602Z
 ---
 
+> **See also:** [JEE Auth, HttpSession & Bean Scopes — a CodeNforce Tutorial](/dev/subsystems/session/jee-auth-and-session-tutorial)
+> for how CDI beans differ from `faces-config.xml` managed beans and why that matters when a muni changes.
+
 ## **Essential CDI Import Paths Reference**
 
 Here's your complete import reference guide for CDI in Jakarta EE 9+:
@@ -41,16 +44,17 @@ import jakarta.enterprise.context.Conversation;       // Conversation scope (adv
 import jakarta.enterprise.context.ConversationScoped; // Long-running conversations (advanced)
 ```
 
-**JSF-specific scope (different package!):**
+**JSF-specific scope (different package, but still a CDI scope):**
 ```java
-// JSF ViewScoped - NOT pure CDI!
+// Faces ViewScoped: lives in the Faces package but IS a CDI scope (@NormalScope(passivating=true)),
+// so it works on @Named beans. It is NOT the legacy faces-config.xml managed-bean view scope.
 import jakarta.faces.view.ViewScoped;  // One instance per JSF view (page)
 ```
 
 **Most common for you:**
 - `@SessionScoped` - Session conductors
 - `@ApplicationScoped` - Cache managers, coordinators, integrators
-- `@ViewScoped` - Backing beans (JSF package, not CDI!)
+- `@ViewScoped` - Backing beans (Faces package, but a CDI scope; pair with `@Named`)
 
 ---
 

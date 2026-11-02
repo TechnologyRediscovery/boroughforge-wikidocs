@@ -3,7 +3,7 @@ title: Git mental model — objects, refs, branches, and worktrees
 description: A developer primer on how git stores data and resolves references, with practical task mapping for branch cleanup, revert strategies, and concurrent LLM agent workflows
 published: true
 date: 2026-08-10T00:00:00.000Z
-tags: git, development, tooling, workflow
+tags: git, development, tooling, workflow, status:has-planned-ref
 editor: markdown
 dateCreated: 2026-08-10T00:00:00.000Z
 ---
@@ -297,6 +297,9 @@ git branch -d agent/task-auth
 - The linked worktree's `.git` entry is a plain file (not a directory) containing a pointer back to `.git/worktrees/<name>/` in the primary repo.
 - Worktrees isolate working state, not logical work partition. Two agents editing the same file in different worktrees will produce merge conflicts on integration. Partitioning the work scope is your responsibility.
 - `git gc` operates on the shared object store and is safe across worktrees, but avoid running it while a commit is in progress in another worktree.
+- **Refs under `refs/` are shared, including `refs/stash`.** The stash is one list for every worktree; `HEAD` and other pseudo refs are per-worktree ([git-worktree, REFS](https://git-scm.com/docs/git-worktree#_refs)). Never rely on `stash@{0}` when more than one worktree is in use.
+
+> 📅 **Planned.** A step-by-step orchestration guide (layout, scope cards, per-worktree review, merge order, sandbox and logging checklist) is drafted and unpublished while it is rehearsed. This section stays the short version.
 
 ---
 

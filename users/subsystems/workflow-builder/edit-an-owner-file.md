@@ -1,8 +1,8 @@
 ---
 title: Edit an Owner File
-description: Change a file's title, paper reference, mailing name and mailing address, read its linked objects, add one of its properties to a parcel group, and retire a file
+description: Change a file's title, paper reference and mailing name, change its mailing address in its own window, read its linked objects, add one of its properties to a parcel group, and retire a file
 published: false
-date: 2026-10-16T12:00:00.000Z
+date: 2026-10-28T12:00:00.000Z
 tags: subsystem:workflow-builder, audience:staff, type:howto
 editor: markdown
 dateCreated: 2026-10-15T12:00:00.000Z
@@ -13,27 +13,52 @@ dateCreated: 2026-10-15T12:00:00.000Z
 Every saved file has two links in its row, **view / edit** and **linked objects**, and an **Actions**
 menu. New to owner files? Start with [Owner Files](/users/subsystems/workflow-builder/owner-files).
 
-## Edit the file
+## Edit the file's name and sorting
 
-1. In the file's row, click **view / edit**.
+1. In the file's row, click **view / edit**. The window is called **Manage owner file name and
+   sorting**.
 2. Change the **Title** (labels and lists sort on it), the **Paper file reference**, or the
    **Mail-to name** (blank uses the head's name).
-3. Under **Mail-to address**, pick one of the offered addresses (the head's, a folded business's, or a
-   parcel owner-mailing address; each shows where it comes from and which one the data would choose),
-   or the first choice to use whatever the data says.
-4. Click **Save changes**. Only real changes are written; each is logged. Saving with no changes
+3. Click **Save changes**. Only real changes are written; each is logged. Saving with no changes
    says "Nothing changed".
-5. If the file shows **Declared address retired**, the address picked earlier was retired; saving
+
+**Paper file reference** is where this owner's physical paper folder lives, for example a cabinet,
+drawer or box number, so a clerk can walk to it. It is free text, up to 200 characters. CodeNforce
+never reads it; it is printed on the CSV roster next to the file. Leave it blank when there is no paper
+folder. Click **What is this?** beside the box in the window for the same explanation.
+
+This window does not change the mailing address. The mailing address has its own window, below.
+
+## Change the mailing address
+
+1. In the file's row, find the **Mail-to address** column and click **change mailing address**. (If the
+   file is locked, the link says **view mailing address** and the window is read only; see below.)
+2. In the **Change mailing address** window, pick one of the offered addresses, or the first choice to
+   use whatever the data says. The list shows each distinct address once, with where it comes from and
+   its role: the owner's own addresses, a folded business's, every mailing address linked to any of the
+   file's properties (whatever its role), and the own addresses of anyone linked to those properties as
+   **property manager**. An address that comes from several places names all of them. The note also
+   says which one the data would choose. Click an address to open its record.
+3. Click **Save mailing address**. The change is logged.
+4. If the window shows **Declared address retired**, the address picked earlier was retired; saving
    without picking one clears the old declaration.
 
-If the file is locked for the rental cycle in the **Rental cycle** box, the window says so. The lock is
-advisory: you can still save, but what you change will differ from the snapshot taken when the file was
-locked. See [Lock and review owner files](/users/subsystems/workflow-builder/lock-and-review-owner-files).
+## A locked file is view only
+
+If the file is locked for the rental cycle in the **Rental cycle** box, both windows above open
+**view only**: a **View only** note at the top says why, the boxes and choices are greyed out, there is
+no save button, and **Cancel** reads **Close**. Saving is also refused by the system, so an old page left
+open cannot get around the lock. Unlock the file first (**Actions**, **Unlock for cycle**; anyone who
+can manage owner files can). The windows are also view only when the **Rental cycle** box is empty,
+because a lock belongs to a cycle. A lock does not stop adding a log entry, flagging for review, changing
+the head, adding a property to a group or retiring the file. See
+[Lock and review owner files](/users/subsystems/workflow-builder/lock-and-review-owner-files).
 
 To link the file to a different head person, see
 [Add an owner file](/users/subsystems/workflow-builder/add-an-owner-file).
 
-<!-- SCREENSHOT NEEDED: The Owner file edit dialog with the title, paper reference, mail-to name and the address radio list. -->
+<!-- SCREENSHOT NEEDED: The Manage owner file name and sorting window with the title, paper reference (and its help tip) and mail-to name. -->
+<!-- SCREENSHOT NEEDED: The Change mailing address window with the address radio list. -->
 
 > **The list shows the mail-to name.** When a file has a **Mail-to name**, the **Title** column in the
 > list shows that name instead of the file title. The title itself is unchanged; it is what labels and

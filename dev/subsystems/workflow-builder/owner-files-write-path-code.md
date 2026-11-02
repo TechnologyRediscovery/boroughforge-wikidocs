@@ -74,16 +74,17 @@ duplicate.
 |---|---|---|---|
 | `ownerfile_proposeFiles` | `ownerfile` INSERT (many) + log | `PROPOSED` | `ON CONFLICT (muni, head) WHERE deactivatedts IS NULL DO NOTHING` per file; one transaction |
 | `ownerfile_createFile` | `ownerfile` INSERT + log | `CREATED_MANUALLY` | Same `ON CONFLICT`; also re-reads the graph first and refuses a head that already has a file |
-| `ownerfile_updateFile` | `ownerfile` UPDATE + log | `TITLE_CHANGED`, `PAPER_REF_CHANGED`, `MAILTO_UPDATED`, `NAME_DECLARED` (only for real changes) | `WHERE ownerfileid = ? AND deactivatedts IS NULL AND (pointed-at link is still active)` |
-| `ownerfile_assignMailtoAddress` | delegates to `ownerfile_updateFile` | `MAILTO_UPDATED` | as above; takes title/paper ref/name from the **saved** row so one click cannot overwrite them |
+| `ownerfile_updateFileNames` | `ownerfile` UPDATE (title, canonicalname, paperfileref only) + log | `TITLE_CHANGED`, `PAPER_REF_CHANGED`, `NAME_DECLARED` (only for real changes) | `WHERE ownerfileid = ? AND deactivatedts IS NULL`; **refused when the file is locked for the cycle** (`requireEditableFile`) |
+| `ownerfile_updateMailtoAddress` | `ownerfile` UPDATE (address pointers, names carried over from a fresh read) + log | `MAILTO_UPDATED` (only for a real change) | `WHERE ownerfileid = ? AND deactivatedts IS NULL AND (pointed-at link is still active)`; **refused when locked** |
+| `ownerfile_assignMailtoAddress` | delegates to `ownerfile_updateMailtoAddress` | `MAILTO_UPDATED` | as above; takes title/paper ref/name from the **saved** row so one click cannot overwrite them; **refused when locked** |
 | `ownerfile_changeHead` | `ownerfile` UPDATE + log | `HEAD_CHANGED`, `TITLE_CHANGED` | `WHERE … head_humanid = <old> AND NOT EXISTS(other active file with new head) AND EXISTS(active new head human)` |
 | `ownerfile_retire` | `ownerfile` UPDATE (soft delete) + log | `RETIRED` | `WHERE ownerfileid = ? AND deactivatedts IS NULL` |
-| `ownerfile_lockForCycle` | log INSERT only | `LOCKED_FOR_CYCLE_MAILING` (+ JSON snapshot) | app-level check of the latest lock row; **no DB guard** (advisory) |
-| `ownerfile_unlockForCycle` | log INSERT only | `UNLOCKED` (note required) | app-level check; no DB guard |
+| `ownerfile_lockForCycle` | log INSERT only | `LOCKED_FOR_CYCLE_MAILING` (+ JSON snapshot) | app-level check of the latest lock row; **no DB guard** (check-then-act) |
+| `ownerfile_unlockForCycle` | log INSERT only | `UNLOCKED` (note optional) | app-level check; no DB guard |
 | `ownerfile_flagForReview` | log INSERT only | `REVIEW_FLAGGED` (`requiresreview = true`) | none needed (append-only) |
 | `ownerfile_resolveReview` | log UPDATE (review cols) + log INSERT | `REVIEW_RESOLVED` | `WHERE ownerfilelogid = ? AND requiresreview AND reviewedts IS NULL` |
 | `ownerfile_addParcelToGroup` | **`parcelparcelgroup` INSERT via `PropertyCoordinator`** + log | `PARCEL_ADDED_TO_GROUP` | **Not atomic** (two integrators); see §9 |
-| `ownerfile_buildAuditSheet` | log INSERT only | `AUDIT_SHEET_PRINTED` | quiet writer (never throws) |
+| `ownerfile_buildAuditSheet` | **writes nothing** (since 2026-10-28, pt2 item 14) | none (`AUDIT_SHEET_PRINTED` is a legacy value, no longer written) | n/a |
 | `ownerfile_logLabelsPrinted` | log INSERT only | `LABELS_PRINTED` | in-memory `run.isLogged()`; quiet writer |
 
 Everything the facility does to `public.*` tables is **one** call: `PropertyCoordinator.linkParcelToParcelGroup`
@@ -264,7 +265,21 @@ Three conventions to remember:
 3. **A row that cannot identify its file, operation or user is refused** by `bindLog` before it reaches the
    database.
 
-## 6. Editing declared state: `ownerfile_updateFile`
+## 6. Editing declared state: `ownerfile_updateFileNames` and `ownerfile_updateMailtoAddress`
+
+> **Update 2026-10-28 (pt2 items 16 and 17).** The old single `ownerfile_updateFile` is now **two** methods,
+> one per dialog. `ownerfile_updateFileNames` writes the title, mail-to name and paper reference through
+> `OwnerFileIntegrator.updateOwnerFileNames` (an `UPDATE` that touches **no address column**).
+> `ownerfile_updateMailtoAddress` writes only the address pointers, carrying the names over from the fresh
+> read, through the integrator's `updateOwnerFile` (the SQL below). A name save can therefore no longer fail
+> on, or clear, a retired address pointer, and an address save cannot overwrite a name. Both take the
+> rental cycle and start with `requireEditableFile`: manage permission, saved id, active file, same muni,
+> **non-blank cycle**, then a **fresh** `ofi.getLatestLockOperation(file, cycle)`; if it is
+> `LOCKED_FOR_CYCLE_MAILING` they throw `AuthorizationException("File N is locked for the cycle X. Unlock it
+> ...")`. The pure, side-effect-free `ownerfile_isEditAllowed` / `ownerfile_getEditBlockReason` give the
+> bean the same answer for `rendered=` / `disabled=` (BB Rule 8: the bean never decides). The sections below
+> describe the diff-then-write pattern as it was written for the combined method; it still applies to each
+> half.
 
 This is the best example of "**diff, then write only what changed**".
 
@@ -396,13 +411,20 @@ Design points:
   There is no status column to keep consistent.
 - **The snapshot is re-derived at lock time**, not copied from what the clerk was looking at, because it is
   "*the* record of what was mailed" (§V3.5.2).
-- **Locks are advisory** (Q-V3-21): nothing is blocked. The UI shows a badge and warns on edit.
-- **Unlock requires a note** (the only *lock* operation that does) and is refused if the file is not locked for
-  that cycle.
+- **Locks are enforced, for the file's names and mail-to address** (supersedes Q-V3-21, 2026-10-28, pt2 item
+  17). `ownerfile_updateFileNames`, `ownerfile_updateMailtoAddress` and `ownerfile_assignMailtoAddress` refuse a
+  file locked for the cycle in the Rental cycle box (§6). Not blocked: change head, retire, add to group, add
+  log entry, flag, lock, unlock, and printing. The cycle comes from a UI box, so a user who changes the box
+  to another cycle sees the file as open: a known gap, recorded as an open question in the pt2 doc.
+- **The notes on lock and unlock are optional** (supersedes the spec's required unlock note). Unlock is still
+  refused if the file is not locked for that cycle.
+- **A quick lock is the same call.** `OwnerFileManagerBB.onQuickLock` calls `ownerfile_lockForCycle(file,
+  cycle, null, …)`, so the snapshot is identical to the dialog's.
 - **There is no database guard** against two clerks locking at the same instant: the "already locked" check
   is a read followed by an insert (check-then-act). The worst case is two `LOCKED…` rows for the same
-  file and cycle, which is harmless because **latest wins**. If you ever *enforce* locks, this must become a
-  guarded write.
+  file and cycle, which is harmless because **latest wins**. The enforcement check in `requireEditableFile`
+  is also a read, so a lock taken in the same instant as a save can still lose the race; if that ever
+  matters, it must become a guarded write.
 
 The snapshot (`lockSnapshot`) is flat JSON built by hand:
 
@@ -461,8 +483,9 @@ muni, and a parcel **already in the group**.
 
 ## 10. Logs that no mutation depends on: the "quiet" writer
 
-Printing an audit list or downloading label PDFs produces log rows (`AUDIT_SHEET_PRINTED`,
-`LABELS_PRINTED`), but a logging failure must **never stop the printout**.
+Downloading label PDFs produces log rows (`LABELS_PRINTED`), but a logging failure must **never stop the
+printout**. (Until 2026-10-28 the audit list wrote an `AUDIT_SHEET_PRINTED` row per file too; pt2 item 14
+removed that, and `ownerfile_buildAuditSheet` now writes nothing. The enum value stays so old rows read.)
 
 ```java
 private boolean writeLogsQuietly(List<OwnerFileLog> logs, String where) {
@@ -484,9 +507,9 @@ quiet; it is in the transaction.
 
 Two decisions about *when* these rows are written:
 
-- `AUDIT_SHEET_PRINTED`: one row per **saved** file each time the audit page is **generated**
-  (reloading the page is a new run and writes again, per Q-V3-16). Unsaved proposals have no file to log
-  against and are skipped.
+- `AUDIT_SHEET_PRINTED`: **no longer written** (pt2 item 14, 2026-10-28). It used to be one row per **saved**
+  file each time the audit page was generated (reloading was a new run, per Q-V3-16); the audit list is now
+  read-only and logs nothing.
 - `LABELS_PRINTED`: at **PDF download**, once per run (`run.isLogged()` flips to true), because "which
   label went to which address" should mean the PDF that actually left, not every preview while offsets were
   tuned.

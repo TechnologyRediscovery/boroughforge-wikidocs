@@ -193,7 +193,7 @@ words.
 Every coordinator write and every derivation prints one line:
 
 ```text
-OwnerFileCoordinator.ownerfile_updateFile | user=17 | file=3 muni=852 | UPDATE ownerfile + 2 log rows [TITLE_CHANGED,MAILTO_UPDATED] humanLink none->4410 parcelLink none->none | run=3f1c…
+OwnerFileCoordinator.ownerfile_updateMailtoAddress | user=17 | file=3 muni=852 | UPDATE ownerfile + 1 log row [MAILTO_UPDATED] humanLink none->4410 parcelLink none->none | run=3f1c…
 OwnerFileCoordinator.ownerfile_deriveSaved | user=17 | muni=852 | READ derived files=41 (saved=41, unsaved=0) foldedEntities=12 ownerlessGroupParcels=0 setupProblems=0 | writes nothing
 ```
 
@@ -258,7 +258,7 @@ Keep "data first, declaration laid over it".
    ECD reviews and runs it.
 2. `OwnerFile` entity getter/setter; copy constructor in `OwnerFileHeavy`.
 3. `SHELL_SELECT` **and** `generateOwnerFileShell`; any `INSERT`/`UPDATE` SQL; `attachSavedFile` in the deriver.
-4. If a clerk edits it: `ownerfile_updateFile` (diff + a log operation), the edit dialog.
+4. If a clerk edits it: `ownerfile_updateFileNames` or `ownerfile_updateMailtoAddress` (diff + a log operation, refused when the file is locked for the cycle), the two dialogs.
 5. Table names: all lowercase smashed; FKs `referencedtable_pkcolumn`; lifecycle columns per repo convention.
 
 ### G. Add a read
@@ -382,9 +382,10 @@ Before finishing any bean or coordinator change, search for these signals (from 
 - **Layer 1 stored enrollment** (Phase 17), deferred until Layer 0 is measured.
 - **Jackson version mismatch** (lock snapshot JSON is hand-written for that reason).
 - **`labelcalibration` table** exists but nothing reads or writes it.
-- **`BackingBeanUtils` keeps per-call values in shared fields** (`connx`, `sessionBean`) on singleton beans: an
+- **`BackingBeanUtils` keeps per-call values in shared fields** (`connx`, `sessionBean`, `facesUser`) on singleton beans: an
   observed hazard, not a reproduced failure; fix is local variables (deriver vs coordinator §6.3). Needs ECD's
-  decision and a regression pass because the base class serves the whole application.
+  decision and a regression pass because the base class serves the whole application. **Tracked as items #10
+  and #11 in `docs/backlog/deferrableMaintenanceItems.md`** (codenforce repo).
 - **`ownerfile.mailto_humanid`** is a reserved, unused column.
 
 ## 8. Practice exercises (do these before changing the deriver)

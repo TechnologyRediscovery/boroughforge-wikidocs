@@ -141,7 +141,7 @@ Proposed registry (slug is the folder name used everywhere in this repo):
 |---|---|---|---|---|
 | `accounts` | `N_USER` | domain | `n_user` | dev, admin, users(basics) |
 | `municipality` | `I_MUNICIPALITY` | domain | `i_municipality` | dev, admin |
-| `codebook` | `II_CODEBOOK` | domain | `ii_codebook` | dev, admin, users |
+| `codebook` | `II_CODEBOOK` | domain | `codebook` (renamed 2026-10-28, was `ii_codebook`) | dev, admin, users |
 | `property` | `III_PROPERTY` | domain | `property` | dev, users, public |
 | `person` | `IV_PERSON` | domain | `person` | dev, users |
 | `event` | `V_EVENT` | domain | `v_event` | dev, users |
@@ -1078,7 +1078,7 @@ memory files, cross-index links) reference the current dir names.
 |---|---|---|
 | `n_user` | `accounts` | `accounts` |
 | `i_municipality` | `municipality` | `municipality` |
-| `ii_codebook` | `codebook` | `codebook` |
+| `codebook` (renamed 2026-10-28, was `ii_codebook`) | `codebook` | `codebook` |
 | `property` (renamed 2026-08-24, was `iii_property`) | `property` | `property` |
 | `person` (renamed 2026-08-20, was `iv_person`) | `person` | `person` |
 | `v_event` | `event` | `event` |

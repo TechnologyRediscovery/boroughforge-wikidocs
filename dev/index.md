@@ -22,6 +22,8 @@ Contact creator Eric Darsow via email at the 3 words echo, charlie, delta spelle
 - [Database notes](/dev/db/dataexchange)
 - [Java notes](/dev/java)
 - [JSF notes](/dev/jsf/faceletreference)
+- [JEE auth, HttpSession & bean scopes tutorial](/dev/subsystems/session/jee-auth-and-session-tutorial) — what
+  WildFly does for us vs. what is home-rolled, and CDI vs `faces-config.xml` beans
 - [Handy tools](/dev/handytools)
 - [Mapping](/dev/mapping)
 - [Test sync](/dev/testsync)

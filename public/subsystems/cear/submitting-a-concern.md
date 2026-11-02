@@ -2,7 +2,7 @@
 title: Submitting a concern
 description: The step-by-step public "Report a Concern" flow
 published: true
-date: 2026-09-30T00:00:00.000Z
+date: 2026-11-02T00:00:00.000Z
 tags: subsystem:cear, audience:public, type:howto
 editor: markdown
 dateCreated: 2026-09-30T00:00:00.000Z
@@ -57,11 +57,12 @@ Tell us who you are:
 - **Remain anonymous?** — a toggle to request that your identity not be shared during the
   investigation. Use this if you're worried about retaliation or simply prefer not to be
   identified.
-- If you'd like a copy of your submission by email, or want to receive status-update emails
-  as your request moves forward, there are separate opt-in checkboxes for each — leaving both
-  unchecked means you won't hear anything further by email (you can still always check status
-  using your confirmation number; see
-  [Checking your request status](/public/subsystems/cear/checking-status-and-unsubscribing)).
+- If you'd like a copy of your submission by email, or want status-update emails as your
+  request moves forward, there are separate opt-in checkboxes for each. Note that if you give an
+  email address, your municipality may also send you updates about later steps (such as a case
+  being closed) even when the updates box is unchecked; every such email has an unsubscribe link.
+  You can always check status using your confirmation number; see
+  [Checking your request status](/public/subsystems/cear/checking-status-and-unsubscribing).
 
 <!-- SCREENSHOT NEEDED: The Contact step showing the role selector, name/phone/email fields,
 and the "remain anonymous" toggle. -->
@@ -86,9 +87,10 @@ number box. -->
 
 - **Write down your confirmation number before you leave the page** — there's no account to
   log back into and retrieve it later if you didn't also request an emailed copy.
-- Status-update emails (if your municipality offers them) are entirely optional — whether you
-  get any depends on both your own opt-in choice here and on whether your municipality has that
-  feature turned on at all.
+- Status-update emails (if your municipality offers them) are optional. Whether you get any
+  depends on your municipality having that feature turned on, and you can stop them at any time
+  with the unsubscribe link in each email. (If you gave an email address, you may receive some
+  update emails even if you didn't tick the updates box — unsubscribe if you'd rather not.)
 
 ## See also
 

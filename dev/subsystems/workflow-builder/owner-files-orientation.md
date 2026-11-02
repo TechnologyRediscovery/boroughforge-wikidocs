@@ -112,7 +112,7 @@ This is the quick glossary; every term maps to a table or a class.
 | **Flag** | A derived warning about a file ("head has 2+ addresses"). Never stored | `OwnerFileFlag` |
 | **Log** | Append-only audit rows for a file | `workflow.ownerfilelog` |
 | **Rental cycle** | Free text like `2026-2029`; lives on log rows, not on the file | `ownerfilelog.rentalcycle` |
-| **Lock** | An advisory "this file's mailing for cycle X is frozen" marker, stored as a log row with a JSON snapshot | `LOCKED_FOR_CYCLE_MAILING` |
+| **Lock** | A "this file's mailing for cycle X is frozen" marker, stored as a log row with a JSON snapshot. Since 2026-10-28 it is **enforced** for the file's names and mail-to address (view only in the UI, refused by the coordinator); it never blocks printing | `LOCKED_FOR_CYCLE_MAILING` |
 | **Muni fence** | Every read/write is limited to one municipality's parcels and files (R-21) | all integrator reads |
 
 ## 4. A picture of the data
@@ -182,7 +182,7 @@ flowchart TD
     D --> E["SAVED FILE"]
     D2 --> E
     E --> F["DECLARE<br/>title, mail-to name, address pointer, paper ref<br/>UPDATE + log rows"]
-    E --> G["AUDIT / LABELS / CSV<br/>read-only outputs; AUDIT_SHEET_PRINTED, LABELS_PRINTED log rows"]
+    E --> G["AUDIT / LABELS / CSV<br/>read-only outputs; only LABELS_PRINTED writes a log row"]
     E --> H["CHANGE HEAD<br/>UPDATE head + HEAD_CHANGED log row"]
     E --> I["FLAG FOR REVIEW / RESOLVE<br/>log rows; review columns of the original row"]
     E --> J["LOCK for a rental cycle<br/>LOCKED_FOR_CYCLE_MAILING + JSON snapshot"]
@@ -226,7 +226,10 @@ default "Rental Property", but each file then lists **all** of its owner's parce
 - **It does not go deeper than one level.** An LLC owned by an LLC owned by a person is *not* folded.
 - **It does not use mailing-address `priority` or "primary" designation.** Legacy data made `priority = 0`
   meaningless (~638 humans have 2+ such links).
-- **It does not block on a lock.** Locking is advisory: a badge and a warning, never a refusal to print.
+- **It does not block printing on a lock, and a lock stops only some edits.** A lock (per cycle) blocks the
+  file's name and sorting, its mail-to address and the one-click assign; it does not block head change, retire,
+  add to group, log entries, flags or printing. A badge shows it; the Needs review flag is derived from open
+  review rows (no stored state).
 - **It does not enroll files in the workflow engine yet.** The column `workflowinstance.ownerfile_ownerfileid`
   exists and is dormant.
 - **It does not write to the link graph.** The one exception is "add parcel to group", which calls the
